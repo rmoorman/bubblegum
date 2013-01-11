@@ -10,3 +10,4 @@ rebar
 deps/*
 priv/*
 ebin/*
+doc/*

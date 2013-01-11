@@ -5,3 +5,8 @@
 *.beam
 *.o
 
+rebar
+.eunit/*
+deps/*
+priv/*
+ebin/*

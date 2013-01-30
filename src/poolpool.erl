@@ -3,6 +3,7 @@
 
 %% API
 -export([start_link/0]).
+-export([checkout/1,checkin/2, checkin/3]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -29,6 +30,36 @@
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+
+checkout(Id) ->
+    {PoolBoy, Ets} = gen_server:call(Id, get_pool),
+    case PoolBoy of
+        empty -> full;
+        {value, PoolBoyPid} ->
+            Worker = poolboy:checkout(PoolBoyPid),
+            if is_pid(Worker) ->
+                ets:insert(Ets, {Worker, PoolBoyPid})
+            end,
+            Worker
+    end.
+
+checkin(Id, Worker) ->
+    checkin(Id, Worker, active).
+
+checkin(Id, Worker, State) ->
+    Ets = gen_server:call(Id, get_wrk2boy),
+    List = ets:lookup(Ets, Worker),
+    case List of
+        [] -> ok; %%FIXME
+        [BoyPid] ->
+            poolboy:checkin(BoyPid, Worker),
+            ets:delete(Ets, Worker),
+            if State == down ->
+                gen_server:cast(Id, {set_down, BoyPid})
+            end,
+            ok
+    end.
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -57,6 +88,8 @@ init([Pools, Config]) ->
     {ok, New2State}.
 
 %%
+handle_call(get_wrk2boy, _From, State) ->
+    {reply, State#state.wrk2boy, State};
 handle_call(get_pool, _From, State) ->
     #state{
         active = Active,

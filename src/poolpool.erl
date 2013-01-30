@@ -56,6 +56,7 @@ init([Pools, Config]) ->
     New2State = populate(BackupList, backup, New1State),
     {ok, New2State}.
 
+%%
 handle_call(get_pool, _From, State) ->
     #state{
         active = Active,
@@ -69,8 +70,13 @@ handle_call(get_pool, _From, State) ->
         true ->
             {ActPid, Backup}
     end,
-    {reply, {BoyPid, EtsId}, State#state{active = NewActive, backup = NewBack}}.
+    {reply, {BoyPid, EtsId}, State#state{active = NewActive, backup = NewBack}};
 
+handle_call(get_down_pool, _From, State) ->
+    {Ans, NewDown} = round_robin(State#state.down),
+    {reply, Ans, State#state{down = NewDown}}.
+
+%%
 handle_cast({set_down, Pool}, State) ->
     Fun = fun (E) -> Pool /= E end,
     IsMember = queue:member(Pool, State#state.active),

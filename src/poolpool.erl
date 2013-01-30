@@ -87,6 +87,18 @@ handle_cast({set_down, Pool}, State) ->
             {noreply, State#state{active = NewActive, down = NewDown}};
         true ->
             {noreply, State}
+    end;
+
+handle_cast({set_active, Pool}, State) ->
+    Fun = fun (E) -> Pool /= E end,
+    IsMember = queue:member(Pool, State#state.down),
+    if
+         IsMember ->
+            NewDown   = queue:filter(Fun, State#state.down),
+            NewActive = queue:in(Pool, State#state.active),
+            {noreply, State#state{active = NewActive, down = NewDown}};
+        true ->
+            {noreply, State}
     end.
 
 handle_info(_Info, State) ->

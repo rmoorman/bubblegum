@@ -1,0 +1,7 @@
+language: erlang
+otp_release:
+    - R15B02
+    - R14B04
+notifications:
+    email: false
+script: "make test"

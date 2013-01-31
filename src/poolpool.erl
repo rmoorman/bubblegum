@@ -84,7 +84,7 @@ init([Pools, Config]) ->
     Down   = queue:new(),
     Backup = queue:new(),
     Table  = ets:new(poolpool_wrk2boy, [public]),
-    {ok, Sup} = poolpool_sup:start_link(?UNDERPOOL, []),
+    {ok, Sup} = poolpool_sup:start_link(),
     State = #state{
             supervisor = Sup,
             active = Active,

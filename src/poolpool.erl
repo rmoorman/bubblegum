@@ -172,7 +172,7 @@ populate([PoolConf | Pools], active = Type, State) ->
     populate(Pools, Type, State#state{active = Queue}).
 
 run_pool({PoolConf, WorkerConf}, Sup) ->
-    Pid = supervisor:start_child(Sup, poolboy:child_spec(PoolConf, WorkerConf)),
+    {ok, Pid} = supervisor:start_child(Sup, poolboy:child_spec(make_ref(), PoolConf, WorkerConf)),
     link(Pid),
     Pid.
 

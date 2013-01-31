@@ -2,7 +2,7 @@
 -behaviour(gen_server).
 
 %% API
--export([start_link/0]).
+-export([start_link/1, start_link/2, stop/1]).
 -export([checkout/1,checkin/2, checkin/3]).
 
 %% gen_server callbacks
@@ -28,9 +28,11 @@
 %%% API
 %%%===================================================================
 
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+start_link(Pools, Config) ->
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [Pools, Config], []).
 
+start_link([Pools, Config]) ->
+    start_link(Pools, Config).
 
 checkout(Id) ->
     {PoolBoy, Ets} = gen_server:call(Id, get_pool),
@@ -60,6 +62,9 @@ checkin(Id, Worker, State) ->
             end,
             ok
     end.
+
+stop(Id) ->
+    gen_server:call(Id, stop).
 
 %%%===================================================================
 %%% gen_server callbacks
@@ -107,7 +112,10 @@ handle_call(get_pool, _From, State) ->
 
 handle_call(get_down_pool, _From, State) ->
     {Ans, NewDown} = round_robin(State#state.down),
-    {reply, Ans, State#state{down = NewDown}}.
+    {reply, Ans, State#state{down = NewDown}};
+
+handle_call(stop, _From, State) ->
+    {stop, normal, ok, State}.
 
 %%
 handle_cast({set_down, Pool}, State) ->
@@ -139,6 +147,7 @@ handle_info(_Info, State) ->
 
 terminate(_Reason, State) ->
     ets:delete(State#state.wrk2boy),
+    true = exit(State#state.supervisor, shutdown),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->

@@ -93,7 +93,7 @@ init([Pools, Config]) ->
             config = Config,
             wrk2boy= Table
             },
-    Fun = fun (Pool) -> proplists:get_bool(backup, Pool) end,
+    Fun = fun ({Pool, _}) -> not proplists:get_value(backup, Pool, false) end,
     ActiveList = lists:filter(Fun, Pools),
     BackupList = lists:filter(fun (Pool) -> not Fun(Pool) end, Pools),
     New1State = populate(ActiveList, active, State),

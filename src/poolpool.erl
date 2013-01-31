@@ -3,7 +3,7 @@
 
 %% API
 -export([start_link/1, start_link/2, stop/1]).
--export([checkout/1,checkin/2, checkin/3]).
+-export([checkout/1, checkout/2, checkin/2, checkin/3]).
 
 %% gen_server callbacks
 -export([init/1,
@@ -35,15 +35,21 @@ start_link([Pools, Config]) ->
     start_link(Pools, Config).
 
 checkout(Id) ->
+    checkout(Id, true).
+
+checkout(Id, Block) ->
     {PoolBoy, Ets} = gen_server:call(Id, get_pool),
     case PoolBoy of
         empty -> full;
         {value, PoolBoyPid} ->
-            Worker = poolboy:checkout(PoolBoyPid),
-            if is_pid(Worker) ->
-                ets:insert(Ets, {Worker, PoolBoyPid})
-            end,
-            Worker
+            Worker = poolboy:checkout(PoolBoyPid, Block),
+            if 
+                is_pid(Worker) ->
+                    ets:insert(Ets, {Worker, PoolBoyPid}),
+                    Worker;
+                true ->
+                    Worker
+            end
     end.
 
 checkin(Id, Worker) ->
@@ -54,11 +60,13 @@ checkin(Id, Worker, State) ->
     List = ets:lookup(Ets, Worker),
     case List of
         [] -> ok; %%FIXME
-        [BoyPid] ->
+        [{Worker, BoyPid}] ->
             poolboy:checkin(BoyPid, Worker),
             ets:delete(Ets, Worker),
-            if State == down ->
-                gen_server:cast(Id, {set_down, BoyPid})
+            if 
+                State == down ->
+                    gen_server:cast(Id, {set_down, BoyPid});
+                true -> ok
             end,
             ok
     end.

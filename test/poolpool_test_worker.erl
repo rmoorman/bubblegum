@@ -6,17 +6,23 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
          code_change/3]).
 -export([check_down/1]).
+-export([get_cookie/1]).
 
-start_link(_Args) ->
-    gen_server:start_link(?MODULE, [], []).
+start_link(Args) ->
+    gen_server:start_link(?MODULE, Args, []).
+
+get_cookie(Id) ->
+    gen_server:call(Id, get_state).
 
 check_down(_Id) -> ok.
 
-init([]) ->
-    {ok, undefined}.
+init(State) ->
+    {ok, State}.
 
 handle_call(die, _From, State) ->
     {stop, {error, died}, dead, State};
+handle_call(get_state, _From, State) ->
+    {reply, State, State};
 handle_call(_Event, _From, State) ->
     {reply, ok, State}.
 

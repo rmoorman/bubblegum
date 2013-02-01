@@ -4,44 +4,53 @@
 
 full_test() ->
     {ok, Pid} = poolpool:start_link([], []),
-    full = poolpool:checkout(Pid),
-    full = poolpool:checkout(Pid),
-    full = poolpool:checkout(Pid),
-    full = poolpool:checkout(Pid),
+    full = out(Pid),
+    full = out(Pid),
+    full = out(Pid),
+    full = out(Pid),
     poolpool:stop(Pid),
     ok.
 
 one_pool_test() ->
-    BoyConf    = [{worker_module, poolpool_test_worker},
-                  {size, 2}, 
-                  {backup, false},
-                  {max_overflow, 0}],
+    BoyConf = config(2),
     WorkerConf = [],
     Pool = {BoyConf, WorkerConf},
     {ok, Pid} = poolpool:start_link([Pool], []),
-    One = poolpool:checkout(Pid, false),
+    One = out(Pid),
     ?assert(is_pid(One)),
-    Two = poolpool:checkout(Pid, false),
+    Two = out(Pid),
     ?assert(is_pid(Two)),
-    full = poolpool:checkout(Pid, false),
-    poolpool:checkin(Pid, Two),
-    Two = poolpool:checkout(Pid, false),
-    full = poolpool:checkout(Pid, false),
-    poolpool:checkin(Pid, One),
-    poolpool:checkin(Pid, Two),
+    full = out(Pid),
+    in(Pid, Two),
+    Two = out(Pid),
+    full = out(Pid),
+    in(Pid, One),
+    in(Pid, Two),
 
     %2
-    One = poolpool:checkout(Pid, false),
+    One = out(Pid),
     ?assert(is_pid(One)),
-    Two = poolpool:checkout(Pid, false),
+    Two = out(Pid),
     ?assert(is_pid(Two)),
-    full = poolpool:checkout(Pid, false),
-    poolpool:checkin(Pid, Two),
-    Two = poolpool:checkout(Pid, false),
-    full = poolpool:checkout(Pid, false),
-    poolpool:checkin(Pid, One),
-    poolpool:checkin(Pid, Two),
+    full = out(Pid),
+    in(Pid, Two),
+    Two = out(Pid),
+    full = out(Pid),
+    in(Pid, One),
+    in(Pid, Two),
 
     poolpool:stop(Pid),
     ok.
+
+out(Poolpool) ->
+    poolpool:checkout(Poolpool).
+
+in(Poolpool, Worker) ->
+    poolpool:checkin(Poolpool, Worker).
+
+config(Size) ->
+    [{worker_module, poolpool_test_worker},
+     {size, Size}, 
+     {backup, false},
+     {max_overflow, 0}].
 

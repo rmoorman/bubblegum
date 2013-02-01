@@ -4,4 +4,4 @@ otp_release:
     - R14B04
 notifications:
     email: false
-script: "make test"
+script: "make compile test"

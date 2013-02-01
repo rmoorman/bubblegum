@@ -43,7 +43,7 @@ one_pool_test() ->
     ok.
 
 out(Poolpool) ->
-    poolpool:checkout(Poolpool).
+    poolpool:checkout(Poolpool, false).
 
 in(Poolpool, Worker) ->
     poolpool:checkin(Poolpool, Worker).

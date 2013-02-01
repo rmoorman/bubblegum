@@ -169,15 +169,18 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+populate(Pools, Type, State) ->
+    populate(Pools, 0, Type, State).
 
-populate([], _, State) -> State;
-populate([PoolConf | Pools], active = Type, State) ->
-    Pid = run_pool(PoolConf, State#state.supervisor),
+populate([], _, _, State) -> State;
+populate([PoolConf | Pools], Num, active = Type, State) ->
+    Pid = run_pool({Num, Type}, PoolConf, State#state.supervisor),
     Queue = queue:in(Pid, State#state.active),
-    populate(Pools, Type, State#state{active = Queue}).
+    populate(Pools, Num+1, Type, State#state{active = Queue}).
 
-run_pool({PoolConf, WorkerConf}, Sup) ->
-    {ok, Pid} = supervisor:start_child(Sup, poolboy:child_spec(make_ref(), PoolConf, WorkerConf)),
+run_pool(Name, {PoolConf, WorkerConf}, Sup) ->
+    Arg = poolboy:child_spec(Name, PoolConf, WorkerConf),
+    {ok, Pid} = supervisor:start_child(Sup, Arg),
     link(Pid),
     Pid.
 

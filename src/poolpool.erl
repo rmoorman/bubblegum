@@ -29,7 +29,7 @@
 %%%===================================================================
 
 start_link(Pools, Config) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [Pools, Config], []).
+    gen_server:start_link(?MODULE, [Pools, Config], []).
 
 start_link([Pools, Config]) ->
     start_link(Pools, Config).

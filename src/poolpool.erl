@@ -23,6 +23,7 @@
         }).
 
 -define(UNDERPOOL, poolboy).
+-define(TRIES, 3).
 
 %%%===================================================================
 %%% API
@@ -38,6 +39,10 @@ checkout(Id) ->
     checkout(Id, true).
 
 checkout(Id, Block) ->
+    checkout(Id, Block, ?TRIES).
+
+checkout(_, _, 0) -> full;
+checkout(Id, Block, Tries) ->
     {PoolBoy, Ets} = gen_server:call(Id, get_pool),
     case PoolBoy of
         empty -> full;
@@ -48,7 +53,7 @@ checkout(Id, Block) ->
                     ets:insert(Ets, {Worker, PoolBoyPid}),
                     Worker;
                 true ->
-                    Worker
+                    checkout(Id, Block, Tries-1)
             end
     end.
 

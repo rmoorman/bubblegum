@@ -42,5 +42,6 @@ one_pool_test() ->
     poolpool:checkin(Pid, One),
     poolpool:checkin(Pid, Two),
 
+    poolpool:stop(Pid),
     ok.
 

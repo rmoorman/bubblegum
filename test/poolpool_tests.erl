@@ -42,6 +42,72 @@ one_pool_test() ->
     poolpool:stop(Pid),
     ok.
 
+sim_two_poolpool_test() ->
+    BoyConf = config(1),
+    WorkerConf = [],
+    Pool = {BoyConf, WorkerConf},
+    {ok, Pid1} = poolpool:start_link([Pool], []),
+    {ok, Pid2} = poolpool:start_link([Pool], []),
+
+    One = out(Pid1),
+    ?assert(is_pid(One)),
+    Two = out(Pid2),
+    ?assert(is_pid(Two)),
+
+    ?assert(full == out(Pid1)),
+    ?assert(full == out(Pid2)),
+
+    in(Pid1, Two),
+    ?assert(full == out(Pid1)),
+    ?assert(full == out(Pid2)),
+
+    in(Pid2, One),
+    ?assert(full == out(Pid1)),
+    ?assert(full == out(Pid2)),
+
+    in(Pid1, One),
+    Three = out(Pid1),
+    ?assert(is_pid(Three)),
+
+
+    in(Pid2, Three),
+    ?assert(full == out(Pid1)),
+    ?assert(full == out(Pid2)),
+
+    in(Pid1, Three),
+
+    poolpool:stop(Pid1),
+    poolpool:stop(Pid2),
+    ok.
+
+
+two_pool_test() ->
+    BoyConf = config(1),
+    Pools = [{BoyConf, one}, {BoyConf, two}],
+    {ok, Pid} = poolpool:start_link(Pools, []),
+    ?assert(is_pid(Pid)),
+
+    One = out(Pid),
+    Two = out(Pid),
+    ?assert(is_pid(One)),
+    ?assert(is_pid(Two)),
+
+    ?assert(full == out(Pid)),
+    ?assert(full == out(Pid)),
+
+    in(Pid, One),
+    Three = out(Pid),
+    ?assert(is_pid(Three)),
+
+    ?assert(full == out(Pid)),
+    ?assert(full == out(Pid)),
+
+    in(Pid, Two),
+    in(Pid, Three),
+    poolpool:stop(Pid),
+
+    ok.
+
 out(Poolpool) ->
     poolpool:checkout(Poolpool, false).
 

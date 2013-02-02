@@ -13,6 +13,9 @@
          terminate/2,
          code_change/3]).
 
+%% Behaviour
+-export([behaviour_info/1]).
+
 -record(state, {
         supervisor :: pid(),
         active :: queue(),
@@ -24,6 +27,11 @@
 
 -define(UNDERPOOL, poolboy).
 -define(TRIES, 3).
+
+behaviour_info(callbacks) ->
+    [{start_link, 1}, {stop, 1}, {check_down, 1}];
+behaviour_info(_) ->
+    undefined.
 
 %%%===================================================================
 %%% API

@@ -6,12 +6,12 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
          code_change/3]).
 -export([check_down/1]).
--export([get_cookie/1]).
+-export([cookie/1]).
 
 start_link(Args) ->
     gen_server:start_link(?MODULE, Args, []).
 
-get_cookie(Id) ->
+cookie(Id) ->
     gen_server:call(Id, get_state).
 
 check_down(_Id) -> ok.

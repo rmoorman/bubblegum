@@ -35,12 +35,16 @@ start_link(Pools, Config) ->
 start_link([Pools, Config]) ->
     start_link(Pools, Config).
 
+-spec checkout(Id :: pid()) -> full | pid().
 checkout(Id) ->
     checkout(Id, true).
 
+-spec checkout(Id :: pid(), Block :: boolean()) -> full | pid().
 checkout(Id, Block) ->
     checkout(Id, Block, ?TRIES).
 
+-spec checkout(Id :: pid(), Block :: boolean(), Tries :: integer()) 
+    -> full | pid().
 checkout(_, _, 0) -> full;
 checkout(Id, Block, Tries) ->
     {PoolBoy, Ets} = gen_server:call(Id, get_pool),
@@ -57,9 +61,11 @@ checkout(Id, Block, Tries) ->
             end
     end.
 
+-spec checkin(Id :: pid(), Worker :: pid()) -> ok.
 checkin(Id, Worker) ->
     checkin(Id, Worker, active).
 
+-spec checkin(Id :: pid(), Worker :: pid(), State :: active | down) -> ok.
 checkin(Id, Worker, State) ->
     Ets = gen_server:call(Id, get_wrk2boy),
     List = ets:lookup(Ets, Worker),
@@ -76,6 +82,7 @@ checkin(Id, Worker, State) ->
             ok
     end.
 
+-spec stop(Id :: pid()) -> term().
 stop(Id) ->
     gen_server:call(Id, stop).
 

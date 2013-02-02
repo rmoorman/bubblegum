@@ -44,15 +44,16 @@ one_pool_test() ->
 
 sim_two_poolpool_test() ->
     BoyConf = config(1),
-    WorkerConf = [],
-    Pool = {BoyConf, WorkerConf},
-    {ok, Pid1} = poolpool:start_link([Pool], []),
-    {ok, Pid2} = poolpool:start_link([Pool], []),
+    {ok, Pid1} = poolpool:start_link([{BoyConf, first}], []),
+    {ok, Pid2} = poolpool:start_link([{BoyConf, second}], []),
 
     One = out(Pid1),
     ?assert(is_pid(One)),
     Two = out(Pid2),
     ?assert(is_pid(Two)),
+
+    ?assert(first  == poolpool_test_worker:cookie(One)),
+    ?assert(second == poolpool_test_worker:cookie(Two)),
 
     ?assert(full == out(Pid1)),
     ?assert(full == out(Pid2)),
@@ -68,7 +69,7 @@ sim_two_poolpool_test() ->
     in(Pid1, One),
     Three = out(Pid1),
     ?assert(is_pid(Three)),
-
+    ?assert(first  == poolpool_test_worker:cookie(Three)),
 
     in(Pid2, Three),
     ?assert(full == out(Pid1)),

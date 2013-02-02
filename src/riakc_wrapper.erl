@@ -1,6 +1,6 @@
 % Like a monkey patching
--behaviour(poolboy_worker).
 -module(riakc_wrapper).
+-behaviour(poolpool).
 
 -export([start_link/1, stop/1]).
 -export([check_down/1]).

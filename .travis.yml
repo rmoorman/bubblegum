@@ -5,5 +5,8 @@ otp_release:
 services:
     - riak
 notifications:
-    email: false
+ irc:
+     channels:
+         - "irc.freenode.org#failfabric"   
+ email: false
 script: "make compile test"

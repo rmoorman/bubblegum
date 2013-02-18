@@ -24,7 +24,7 @@ distclean: rebar
 deps: rebar
 	$(REBAR) get-deps
 
-compile: deps
+compile: rebar
 	$(REBAR) compile
 
 test: eunit

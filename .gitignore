@@ -8,8 +8,7 @@
 rebar
 .eunit/*
 deps/*
-priv/*
-ebin/*
+ebin
 doc/*
 *.dump
 conf_cache.db

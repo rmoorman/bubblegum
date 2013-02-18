@@ -11,3 +11,6 @@ deps/*
 priv/*
 ebin/*
 doc/*
+*.dump
+conf_cache.db
+

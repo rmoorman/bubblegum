@@ -6,7 +6,7 @@
 *.o
 
 rebar
-.eunit/*
+.eunit
 deps/*
 ebin
 doc/*

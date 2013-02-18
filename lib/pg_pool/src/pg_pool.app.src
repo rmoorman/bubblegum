@@ -1,0 +1,14 @@
+{application, pg_pool,
+ [
+  {description, "The poolboy-based PostgreSQL pool"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  sasl,
+                  confetti
+                 ]},
+  {mod, { pg_pool, []}},
+  {env, []}
+ ]}.

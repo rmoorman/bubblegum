@@ -1,5 +1,9 @@
-ERL_OPTS=""
-ERL_RUN=""
+ERL_EBIN_DIRS=
+ERL_EBIN_DIRS+=$(CURDIR)/ebin 
+ERL_EBIN_DIRS+=$(CURDIR)/lib/*/ebin 
+ERL_EBIN_DIRS+=$(CURDIR)/deps/*/ebin 
+ERL_OPTS= -pa $(ERL_EBIN_DIRS)
+ERL_RUN=
 
 REBAR=./rebar
 
@@ -34,5 +38,5 @@ docs: rebar
 #	@dialyzer -c ebin
 
 run:
-	erl $(ERL_OPTS) -pa $(CURDIR)/ebin $(CURDIR)/deps/*/ebin $(ERL_RUN)
+	erl $(ERL_OPTS) $(ERL_RUN)
 

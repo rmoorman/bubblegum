@@ -1,6 +1,69 @@
 -module(acl_pg).
 
+-export([get_role/2, set_role/2, alloc_role/1, create_role/2, delete_role/2]).
+-export([get_resource/2, set_resource/2, alloc_resource/1, create_resource/2, delete_resource/2]).
+
 -include("acl.hrl").
+
+%% Role API
+get_role(Conn, RoleId) ->
+    Query = "SELECT role_val FROM acl_role WHERE role_key = $1",
+    {ok, _, Row} = pgsql:equery(Conn, Query, [RoleId]),
+    [{Txt}] = Row,
+    json_to_role(Txt).
+
+set_role(Conn, Role) ->
+    RoleId = Role#acl_role.id,
+    Json = role_to_json(Role),
+    Query = "UPDATE acl_role SET role_val = $2 WHERE role_key = $1",
+    {ok, _} = pgsql:equery(Conn, Query, [RoleId, Json]),
+    ok.
+
+alloc_role(Conn) ->
+    Query = "INSERT INTO acl_role (role_val) VALUES (NULL) RETURNING role_key",
+    {ok, _, _, [{Key}]} = pgsql:equery(Conn, Query),
+    Key.
+
+create_role(Conn, Role) ->
+    Id = alloc_role(Conn),
+    NRole = Role#acl_role{id = Id},
+    set_role(Conn, NRole),
+    NRole.
+
+delete_role(Conn, #acl_role{id = Id}) ->
+    Query = "DELETE FROM acl_role WHERE role_key = $1",
+    pgsql:equery(Conn, Query, [Id]),
+    ok.
+
+%% Resource API
+get_resource(Conn, ResourceId) ->
+    Query = "SELECT resource_val FROM acl_resource WHERE resource_key = $1",
+    {ok, _, Row} = pgsql:equery(Conn, Query, [ResourceId]),
+    [{Txt}] = Row,
+    json_to_resource(Txt).
+
+set_resource(Conn, Resource) ->
+    ResourceId = Resource#acl_resource.id,
+    Json = resource_to_json(Resource),
+    Query = "UPDATE acl_resource SET resource_val = $2 WHERE resource_key = $1",
+    {ok, _} = pgsql:equery(Conn, Query, [ResourceId, Json]),
+    ok.
+
+alloc_resource(Conn) ->
+    Query = "INSERT INTO acl_resource (resource_val) VALUES (NULL) RETURNING resource_key",
+    {ok, _, _, [{Key}]} = pgsql:equery(Conn, Query),
+    Key.
+
+create_resource(Conn, Resource) ->
+    Id = alloc_resource(Conn),
+    NResource = Resource#acl_resource{id = Id},
+    set_resource(Conn, NResource),
+    NResource.
+
+delete_resource(Conn, #acl_resource{id = Id}) ->
+    Query = "DELETE FROM acl_resource WHERE resource_key = $1",
+    pgsql:equery(Conn, Query, [Id]),
+    ok.
 
 %% internal
 detuple({A}) -> A.

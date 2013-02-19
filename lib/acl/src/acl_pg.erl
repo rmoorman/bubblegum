@@ -161,4 +161,19 @@ role_to_json_test() ->
     ?assertEqual(Role2, OriginRole),
     ok.
 
+resource_json_test() ->
+    OJson = 
+            <<"{\"id\":1,\"updated_at\":0,\"updated_by\":1,\"actions\":{\"edit\":{\"allow\":[1,2]},\"delete\":{\"allow\":[1,2]}}}">>,
+    ORes = #acl_resource{
+            id = 1,
+            updated_at = 0,
+            updated_by = 1,
+            actions = [{<<"edit">>, [1,2], []}, {<<"delete">>, [1,2], []}]
+            },
+    Res = json_to_resource(OJson),
+    ?assertEqual(ORes, Res),
+    Json = resource_to_json(Res),
+    Res2 = json_to_resource(Json),
+    ?assertEqual(Res2, ORes),
+    ok.
 -endif.

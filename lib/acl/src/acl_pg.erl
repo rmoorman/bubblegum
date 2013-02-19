@@ -99,8 +99,9 @@ role_to_json(#acl_role{
                 ]}).
 
 json_to_resource(Json) ->
-    F = fun (D) ->
-            {proplists:get_value(<<"allow">>, D, []),
+    F = fun ({Name, {D}}) ->
+            {Name,
+             proplists:get_value(<<"allow">>, D, []),
              proplists:get_value(<<"deny">>, D, [])}
     end,
     {Decoded} = jiffy:decode(Json),
@@ -120,19 +121,26 @@ resource_to_json(Res) ->
         updated_by = By,
         actions = Act
         } = Res,
-    JAct = lists:map(fun ({K, {Allow, Deny}}) ->
-                    {action_to_json(K), {[
-                                {allow, Allow},
-                                {deny, Deny}
-                                ]}}
+    JAct = lists:map(fun ({K, Allow, Deny}) ->
+                    {action_to_json(K), {
+                            if Allow == [] -> [];
+                                true -> [{allow, Allow}]
+                            end
+                            ++
+                            if Deny == [] -> [];
+                                true -> [{deny, Deny}]
+                            end
+                            }}
             end, Act),
+    JFill = lists:filter(fun ({_,{[]}}) -> false; (_) -> true end,
+                         JAct),
     Ans = [
             {id, resourceid_to_json(Id)},
             {updated_at, roleid_to_json(At)},
             {updated_by, By},
-            {actions, {JAct}}
+            {actions, {JFill}}
             ],
-    jiffy:encode(Ans).
+    jiffy:encode({Ans}).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

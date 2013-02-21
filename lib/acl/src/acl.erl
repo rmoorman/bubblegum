@@ -90,12 +90,20 @@ get_precedents(C, Resource) -> [].
 
 %% @doc Gets primary roles for the given role
 -spec get_roles(conn(), role_id()) -> [role_id()].
-get_roles(C, Role) -> [].
+get_roles(C, RoleId) ->
+    Role = ?u:get_role(C, RoleId),
+    Role#acl_role.member_of.
 
 
 %% @doc Gets all roles for the given role
 -spec get_all_roles(conn(), role_id()) -> [role_id()].
-get_all_roles(C, Role) -> [].
+get_all_roles(C, Role) -> get_all_roles_(C, [Role], []).
+
+get_all_roles_(_, [], Visited) -> Visited;
+get_all_roles_(C, [Current|Tail], Visited) ->
+    Member = get_roles(C, Current),
+    New = ordsets:subtract(Member, Visited),
+    get_all_roles_(C, ordsets:union(New, Tail), ordsets:union(New, Visited)).
 
 
 %% @doc Incrementally update roles for the given role
@@ -105,6 +113,9 @@ update_roles(C, Role, Roles) -> {fail, todo}.
 
 %% @doc Rewrite roles for the given role
 -spec set_roles(conn(), role_id(), [role_id()]) -> answer().
-set_roles(C, Role, Roles) -> {fail, todo}.
+set_roles(C, RoleId, Roles) ->
+    Role = ?u:get_role(C, RoleId),
+    ?u:set_role(C, Role#acl_role{member_of = ordsets:from_list(Roles)}),
+    ok.
 
 %% to be continued...

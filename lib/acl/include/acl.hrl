@@ -1,8 +1,8 @@
 
 -type role_id() :: non_neg_integer(). 
 -type resource_id() :: non_neg_integer(). 
--type action_name() :: binary().
--type acl_action() :: {action_name(), [role_id()], [role_id()]}.
+-type action_name() :: atom().
+-type acl_action() :: {action_name(), {[role_id()], [role_id()]}}.
 
 -record(acl_role, {
         id :: role_id(),

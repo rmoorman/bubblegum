@@ -111,9 +111,9 @@ role_to_json(#acl_role{
 
 json_to_resource(Json) ->
     F = fun ({Name, {D}}) ->
-            {Name,
-             proplists:get_value(<<"allow">>, D, []),
-             proplists:get_value(<<"deny">>, D, [])}
+            {list_to_atom(binary_to_list(Name)),
+             {proplists:get_value(<<"allow">>, D, []),
+              proplists:get_value(<<"deny">>, D, [])}}
     end,
     {Decoded} = jiffy:decode(Json),
     #acl_resource{
@@ -132,7 +132,7 @@ resource_to_json(Res) ->
         updated_by = By,
         actions = Act
         } = Res,
-    JAct = lists:map(fun ({K, Allow, Deny}) ->
+    JAct = lists:map(fun ({K, {Allow, Deny}}) ->
                     {action_to_json(K), {
                             if Allow == [] -> [];
                                 true -> [{allow, Allow}]
@@ -179,7 +179,7 @@ resource_json_test() ->
             id = 1,
             updated_at = 0,
             updated_by = 1,
-            actions = [{<<"edit">>, [1,2], []}, {<<"delete">>, [1,2], []}]
+            actions = [{edit, {[1,2], []}}, {delete, {[1,2], []}}]
             },
     Res = json_to_resource(OJson),
     ?assertEqual(ORes, Res),

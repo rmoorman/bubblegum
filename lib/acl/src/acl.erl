@@ -34,6 +34,25 @@
 
 -type conn() :: term().
 
+%% Underlying persistent storage
+-define(u, acl_pg).
+
+default_policy(deny)  -> deny;
+default_policy(allow) -> allow;
+default_policy(undefined) -> deny;
+default_policy(List) when is_list(List) ->
+    default_policy(default_policy_list(List)).
+
+default_policy(deny, _) -> deny;
+default_policy(_, deny) -> deny;
+default_policy(allow, _) -> allow;
+default_policy(_, allow) -> allow;
+default_policy(_, _) -> undefined.
+
+default_policy_list([deny|_]) -> deny;
+default_policy_list([H|T]) -> default_policy(H, default_policy_list(T));
+default_policy_list([]) -> undefined.
+
 %% @doc Ask for permission
 -spec ask(conn(), role_id(), actions(), resource_id()) -> verdicts().
 ask(C, Role, Action, Resource) when is_atom(Action) ->

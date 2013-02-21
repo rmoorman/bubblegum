@@ -1,7 +1,18 @@
 -module(acl_pg).
 
--export([get_role/2, set_role/2, alloc_role/1, create_role/2, delete_role/2]).
--export([get_resource/2, set_resource/2, alloc_resource/1, create_resource/2, delete_resource/2]).
+-export([get_role/2
+        ,set_role/2
+        ,alloc_role/1
+        ,create_role/2
+        ,delete_role/2
+        ]).
+
+-export([get_resource/2
+        ,set_resource/2
+        ,alloc_resource/1
+        ,create_resource/2
+        ,delete_resource/2
+        ]).
 
 -include("acl.hrl").
 

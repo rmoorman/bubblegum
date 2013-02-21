@@ -1,15 +1,26 @@
 %% @doc ACL frontend
 -module(acl).
 
--export([ask/3, update_precedents/2, set_precedents/2,get_precedents/1]).
--export_type([role_id/0, resource_id/0, action/0,
-              actions/0, verdict/0, verdicts/0,
-              precedent/0, precedents/0]).
+-export([ask/4
+        ,update_precedents/3
+        ,set_precedents/3
+        ,get_precedents/2
+        ,get_roles/2
+        ,get_all_roles/2
+        ]).
+-export_type([role_id/0
+             ,resource_id/0
+             ,action/0
+             ,actions/0
+             ,verdict/0
+             ,verdicts/0
+             ,precedent/0
+             ,precedents/0
+             ]).
+
+-include("acl.hrl").
 
 %% Some useful types
--type role_id() :: string().
--type resource_id() :: string().
-
 -type action()  :: atom().
 -type actions() :: action() | [action()].
 

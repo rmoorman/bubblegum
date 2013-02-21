@@ -61,9 +61,26 @@ ask(C, Role, Action, Resource) when is_atom(Action) ->
         Error -> Error
     end;
 
-ask(C, Role, Actions, Resource) ->
-    [allow || _ <- Actions]. % haha TODO
+ask(C, RoleId, Actions, ResourceId) ->
+    Resource = (?u:get_resource(C, ResourceId))#acl_resource.actions,
+    [default_policy(ask_(C, RoleId, Action, Resource, []))
+     || Action <- Actions].
 
+ask_(C, RoleId, Action, Resource, Visited) ->
+    {Allow, Deny} = proplists:get_value(Action, Resource, {[], []}),
+    IsDeny  = ordsets:is_element(RoleId, Deny),
+    IsAllow = ordsets:is_element(RoleId, Allow),
+    if
+        IsDeny -> deny;
+        IsAllow -> allow;
+        true ->
+            Role = ?u:get_role(C, RoleId),
+            NVis = ordsets:add_element(RoleId, Visited),
+            default_policy_list([
+                    ask_(C, RID, Action, Resource, NVis)
+                    || RID <- Role#acl_role.member_of,
+                       not ordsets:is_element(RID, NVis)])
+    end.
 
 %% @doc Incrementally update precedents for the given resource
 %%

@@ -135,4 +135,25 @@ set_roles(C, RoleId, Roles) ->
     ?u:set_role(C, Role#acl_role{member_of = ordsets:from_list(Roles)}),
     ok.
 
-%% to be continued...
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+chk(Expected, Given) -> ?_assertEqual(Expected, default_policy(Given)).
+chkl(Expected, Given) -> ?_assertEqual(Expected, default_policy_list(Given)).
+
+default_policy_test_() -> [
+        chk(deny, deny),
+        chk(deny, undefined),
+        chk(allow, allow),
+        chk(deny, [allow, undefined, deny]),
+        chk(allow, [allow, undefined, undefined]),
+        chk(allow, [undefined, allow, undefined]),
+        chk(allow, [undefined, allow, undefined]),
+        chk(deny, [undefined, undefined, undefined]),
+        chkl(undefined, [undefined, undefined, undefined]),
+        chk(deny, [undefined, undefined, allow, deny]),
+        chk(deny, [deny, undefined, allow, undefined])
+        ].
+
+-endif.
+

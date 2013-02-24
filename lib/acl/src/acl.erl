@@ -5,6 +5,11 @@
         ,update_precedents/3
         ,set_precedents/3
         ,get_precedents/2
+
+         %% Role
+        ,add_roles/3
+        ,delete_roles/3
+        ,set_roles/3
         ,get_roles/2
         ,get_all_roles/2
         ]).
@@ -90,20 +95,36 @@ ask_(C, RoleId, Action, Resource, Visited) ->
 %% When resource have {Role, Action} pair, update_precedents remaps it
 %% to the specified Verdict.
 -spec update_precedents(conn(), resource_id(), precedents()) -> answer().
-update_precedents(C, Resource, Precedents) -> {fail, todo}.
-
+update_precedents(C, ResourceId, Precedents) ->
+    Old = [{{Role, Act}, Verd} || {Role, Act, Verd} <- get_precedents(C, ResourceId)],
+    Upd = [{{Role, Act}, Verd} || {Role, Act, Verd} <- Precedents],
+    Fun = fun (_K, _V1, V2) -> V2 end,
+    New = orddict:merge(Fun, Old, Upd),
+    set_precedents(C, ResourceId, New).
 
 %% @doc Fully rewrites a precedent list for the given resource
 %%
 %% Erases old precedent list and create a new one based on Precedents.
 -spec set_precedents(conn(), resource_id(), precedents()) -> answer().
-set_precedents(C, Resource, Precedents) -> {fail, todo}.
-
+set_precedents(C, ResourceId, Precedents) -> 
+    Names = ordsets:from_list([Act || {_, Act, _} <- Precedents]),
+    Actions = [{Action, {
+        [RID || {RID, Act, allow} <- Precedents, Act == Action],
+        [RID || {RID, Act, deny}  <- Precedents, Act == Action]}}
+               || Action <- Names],
+    Resource = ?u:get_resource(C, ResourceId),
+    ?u:set_precedents(C, Resource#acl_resource{actions = Actions}),
+    Precedents.
 
 %% @doc Gets all precedents for the given resource
 -spec get_precedents(conn(), resource_id()) -> precedents().
-get_precedents(C, Resource) -> [].
-
+get_precedents(C, ResourceId) ->
+    #acl_resource{actions = Acts} = ?u:get_resource(C, ResourceId),
+    [{RoleId, Action, deny} || {Action, {_, Roles}} <- Acts,
+                               RoleId <- Roles]
+    ++
+    [{RoleId, Action, allow} || {Action , {Roles, _}} <- Acts,
+                                RoleId <- Roles].
 
 %% @doc Gets primary roles for the given role
 -spec get_roles(conn(), role_id()) -> [role_id()].
@@ -123,10 +144,23 @@ get_all_roles_(C, [Current|Tail], Visited) ->
     get_all_roles_(C, ordsets:union(New, Tail), ordsets:union(New, Visited)).
 
 
-%% @doc Incrementally update roles for the given role
--spec update_roles(conn(), role_id(), [role_id()]) -> answer().
-update_roles(C, Role, Roles) -> {fail, todo}.
+%% @doc Add roles for the given role
+-spec add_roles(conn(), role_id(), [role_id()]) -> answer().
+add_roles(C, RoleId, Roles) ->
+    Role = ?u:get_role(C, RoleId),
+    RolesList = ordsets:from_list(Roles),
+    NRole = Role#acl_role{member_of = lists:union(
+                Role#acl_role.member_of, RolesList)},
+    ?u:set_role(C, NRole).
 
+%% @doc Remove roles for the given role
+-spec delete_roles(conn(), role_id(), [role_id()]) -> answer().
+delete_roles(C, RoleId, Roles) ->
+    Role = ?u:get_role(C, RoleId),
+    RolesList = ordsets:from_list(Roles),
+    NRole = Role#acl_role{member_of = lists:subtract(
+                Role#acl_role.member_of, RolesList)},
+    ?u:set_role(C, NRole).
 
 %% @doc Rewrite roles for the given role
 -spec set_roles(conn(), role_id(), [role_id()]) -> answer().

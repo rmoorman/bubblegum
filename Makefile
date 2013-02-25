@@ -36,7 +36,7 @@ eunit: rebar .eunit/conf
 		&& $(REBAR) -v skip_deps=true eunit
 
 test-travis: rebar .eunit/conf
-	export PG_POOL_CONFIG=pg_pool.travis.conf
+	export PG_POOL_CONFIG=pg_pool.travis.conf \
 		ERL_AFLAGS="$(ERL_TEST_OPTS)" \
 		&& $(REBAR) -v skip_deps=true eunit
 	

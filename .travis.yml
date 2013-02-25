@@ -14,9 +14,9 @@ notifications:
     email: false
 
 before_script:
-    - psql -c 'CREATE funtester_test;' -U postgres
-    - psql -c 'CREATE funtester_develop;' -U postgres
+    - psql -c 'CREATE DATABASE funtester_test;' -U postgres
+    - psql -c 'CREATE DATABASE funtester_develop;' -U postgres
 
 install: "make deps compile"
-script: "make travis-test"
+script: "make test-travis"
 

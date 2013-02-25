@@ -2,11 +2,21 @@ language: erlang
 otp_release:
     - R15B02
     - R14B04
+
 services:
     - riak
+    - postgresql
+
 notifications:
     irc:
         channels:
             - "irc.freenode.org#failfabric"   
     email: false
-script: "make compile test"
+
+before_script:
+    - psql -c 'CREATE DATABASE funtester_test;' -U postgres
+    - psql -c 'CREATE DATABASE funtester_develop;' -U postgres
+
+install: "make deps compile"
+script: "make test-travis"
+

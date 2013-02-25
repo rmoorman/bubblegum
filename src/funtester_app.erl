@@ -10,6 +10,12 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
+    ToStart = [sasl, confetti, pg_pool, acl, nprocreg],
+    ToLoad  = [mochiweb],
+
+    [application:load(App)  || App <- ToLoad ++ ToStart],
+    [application:start(App) || App <- ToStart],
+
     funtester_sup:start_link().
 
 stop(_State) ->

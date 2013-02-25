@@ -1,8 +1,6 @@
-ERL_EBIN_DIRS=
-ERL_EBIN_DIRS+=$(CURDIR)/ebin 
-ERL_EBIN_DIRS+=$(CURDIR)/lib/*/ebin 
-ERL_EBIN_DIRS+=$(CURDIR)/deps/*/ebin 
+ERL_EBIN_DIRS=$(shell find $(PWD)/deps $(PWD)/lib $(PWD)/ -maxdepth 2 -name ebin)
 ERL_OPTS= -pa $(ERL_EBIN_DIRS)
+ERL_TEST_OPTS=-boot start_sasl -sasl sasl_error_logger false $(ERL_OPTS)
 ERL_RUN=
 
 REBAR=./rebar
@@ -27,10 +25,21 @@ deps: rebar
 compile: rebar
 	$(REBAR) compile
 
-test: eunit
-eunit: rebar
-	$(REBAR) skip_deps=true eunit
+.eunit/conf:
+	mkdir -p .eunit
+	ln -fs $(PWD)/conf $(PWD)/.eunit/conf
 
+test: eunit
+eunit: rebar .eunit/conf
+	export PG_POOL_CONFIG=pg_pool.tests.conf \
+		ERL_AFLAGS="$(ERL_TEST_OPTS)" \
+		&& $(REBAR) -v skip_deps=true eunit
+
+test-travis: rebar .eunit/conf
+	export PG_POOL_CONFIG=pg_pool.travis.conf
+		ERL_AFLAGS="$(ERL_TEST_OPTS)" \
+		&& $(REBAR) -v skip_deps=true eunit
+	
 docs: rebar
 	$(REBAR) skip_deps=true doc
 

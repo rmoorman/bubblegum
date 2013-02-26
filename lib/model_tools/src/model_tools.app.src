@@ -1,0 +1,11 @@
+{application, model_tools,
+ [
+  {description, "Some useful functions for models"},
+  {vsn, "1"},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  pg_pool
+                 ]},
+  {env, []}
+ ]}.

@@ -39,8 +39,11 @@
         ,decode/2
         ]).
 
+-include("model.hrl").
+
 %% Some local-scope defines
 -define(a2b(Atom), list_to_binary(atom_to_list(Atom))).
+
 
 %% Encode
 encode(Var, Format) ->
@@ -111,10 +114,12 @@ from_eep18({V}, {Fields, FormatsDict}) ->
 -include_lib("eunit/include/eunit.hrl").
 
 -record(r1, {id, a, b}).
--define(r1, {record, r1, record_info(fields, r1), [{b, string}]}).
+%-define(r1, {record, r1, record_info(fields, r1), [{b, string}]}).
+-define(r1, ?jsonee(r1, [{b, string}])).
 
 -record(r2, {id, a, lstofr1}).
--define(r2, {record, r2, record_info(fields, r2), [{lstofr1, [?r1]}]}).
+%-define(r2, {record, r2, record_info(fields, r2), [{lstofr1, [?r1]}]}).
+-define(r2, ?jsonee(r2, [{lstofr1, [?r1]}])).
 
 fst_test() ->
     T = #r1{id = 1, a = 2, b = "3"},

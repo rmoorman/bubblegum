@@ -29,7 +29,7 @@
 -define(set(Pid), put(?name, Pid)).
 -define(check, 
     begin
-        Cond = is_pid(?pid) and is_process_alive(?pid),
+        Cond = is_pid(?pid) andalso is_process_alive(?pid),
         if
             Cond -> ok;
             true -> renew()

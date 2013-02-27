@@ -44,12 +44,18 @@
 %% Some local-scope defines
 -define(a2b(Atom), list_to_binary(atom_to_list(Atom))).
 
+-type format() :: id | undefined | atom | integer | string
+                | [format()]  % list 
+                | {[atom()], [{atom(), format()}]} % tuple
+                | {record, atom(), [atom()], [{atom(), format()}]}. % record
 
 %% Encode
+-spec encode(term(), format()) -> binary().
 encode(Var, Format) ->
     jiffy:encode(to_eep18(Var, Format)).
 
 % Simple structs
+-spec to_eep18(term(), format()) -> term().
 to_eep18(Var, id)        -> Var;
 to_eep18(Var, undefined) -> Var;
 to_eep18(Var, atom)    when is_atom(Var)    -> Var;
@@ -80,9 +86,11 @@ to_eep18(Var, {Fields, FormatsDict}) ->
 
 
 %% Decode
+-spec decode(binary(), format()) -> term().
 decode(Bin, Format) ->
     from_eep18(jiffy:decode(Bin), Format).
 
+-spec from_eep18(term(), format()) -> term().
 from_eep18(Var, id)        -> Var;
 from_eep18(Var, undefined) -> Var;
 from_eep18(Var, atom)    when is_binary(Var)  -> list_to_atom(binary_to_list(Var));

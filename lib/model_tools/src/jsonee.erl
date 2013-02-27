@@ -121,7 +121,7 @@ from_eep18({V}, {Fields, FormatsDict}) ->
 %-define(r2, {record, r2, record_info(fields, r2), [{lstofr1, [?r1]}]}).
 -define(r2, ?jsonee(r2, [{lstofr1, [?r1]}])).
 
-fst_test() ->
+simple_test() ->
     T = #r1{id = 1, a = 2, b = "3"},
     Json = encode(T, ?r1),
     io:format("JSON: ~p~n", [Json]),
@@ -130,7 +130,7 @@ fst_test() ->
     ?assert(TT == T),
     ok.
 
-snd_test() ->
+nested_test() ->
     T1 = #r1{id = 1, a = 2, b = "WaWa"},
     T2 = #r1{id = 2, a = 4, b = "HaHA"},
     S  = #r2{id = 1, a = 1, lstofr1 = [T1, T2]},
@@ -141,6 +141,16 @@ snd_test() ->
     ?assert(SS == S),
     ok.
 
+tuple_test() ->
+    T = {[1,2,3], [4,5,6]},
+    F = {[allow, deny], [{allow, [integer]}, {deny, [integer]}]},
+    Json = encode(T, F),
+    io:format("JSON: ~p~n", [Json]),
+    TT = decode(Json, F),
+    io:format("REC:  ~p~n", [TT]),
+    ?assert(TT == T),
+    ok.
+    
 
 -endif.
 

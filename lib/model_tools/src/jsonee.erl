@@ -24,12 +24,12 @@
 %%
 %% At first you need to create format for your record:
 %% 
-%%      ?jsonee(key_value, [{key, atom}, {value, string}]).
+%%      -define(s, ?jsonee(key_value, [{key, atom}, {value, string}])).
 %%
 %% Now you can use encode and decode
 %%
-%%      Json = jsonee:encode(Record, ?key_value)
-%%      NewRecord = jsonee:decode(Json, ?key_value)
+%%      Json = jsonee:encode(Record, ?s)
+%%      NewRecord = jsonee:decode(Json, ?s)
 %%
 -module(jsonee).
 
@@ -69,10 +69,15 @@ to_eep18(Var, string)  when is_integer(Var) -> list_to_binary(integer_to_list(Va
 to_eep18(Var, [])       -> Var;
 to_eep18(Var, [Format]) -> [to_eep18(Item, Format) || Item <- Var];
 
+to_eep18(Var, {dict, FmtK, FmtV}) 
+        when (FmtK == atom) or (FmtK == string) or (FmtK == integer) ->
+    {[{to_eep18(K, FmtK), to_eep18(V, FmtV)}
+      || {K, V} <- Var]};
+
 to_eep18(Var, {record, Record, Fields}) -> to_eep18(Var, {record, Record, Fields, []});
 to_eep18(Var, {record, _Record, Fields, FormatsDict}) -> 
-    FD = [{'?tuple', skip}|FormatsDict],
-    to_eep18(Var, {['?tuple'|Fields], FD});
+    FD = [{'?tuple', skip} | FormatsDict],     % Record is a tuple, skip the record
+    to_eep18(Var, {['?tuple' | Fields], FD});  % signature
 
 to_eep18(Var, {Fields})  -> to_eep18(Var, {Fields, []});
 to_eep18(Var, {Fields, FormatsDict}) ->
@@ -91,21 +96,26 @@ decode(Bin, Format) ->
     from_eep18(jiffy:decode(Bin), Format).
 
 -spec from_eep18(term(), format()) -> term().
-from_eep18(Var, id)        -> Var;
-from_eep18(Var, undefined) -> Var;
-from_eep18(Var, atom)    when is_binary(Var)  -> list_to_atom(binary_to_list(Var));
-from_eep18(Var, integer) when is_integer(Var) -> Var;
-from_eep18(Var, string)  when is_binary(Var)  -> binary_to_list(Var);
-from_eep18(Var, string)  when is_integer(Var) -> integer_to_list(Var);
+from_eep18(V, id)        -> V;
+from_eep18(V, undefined) -> V;
+from_eep18(V, atom)    when is_binary(V)  -> list_to_atom(binary_to_list(V));
+from_eep18(V, integer) when is_integer(V) -> V;
+from_eep18(V, string)  when is_binary(V)  -> binary_to_list(V);
+from_eep18(V, string)  when is_integer(V) -> integer_to_list(V);
 
 from_eep18(V, []) -> V;
 from_eep18(_V, {set, F}) -> F;
 from_eep18(V, [Format]) -> [from_eep18(I, Format) || I <- V];
 
+from_eep18({V}, {dict, FmtK, FmtV}) 
+        when (FmtK == atom) or (FmtK == string) or (FmtK == integer) ->
+    [{from_eep18(Key, FmtK), from_eep18(Val, FmtV)}
+     || {Key, Val} <- V];
+
 from_eep18(V, {record, Record, Fields}) -> from_eep18(V, {record, Record, Fields, []});
 from_eep18(V, {record, Record, Fields, FormatsDict}) ->
-    FD = [{'?tuple', {set, Record}}|FormatsDict],
-    from_eep18(V, {['?tuple'|Fields], FD});
+    FD = [{'?tuple', {set, Record}} | FormatsDict],  % Append record tag to tuple
+    from_eep18(V, {['?tuple' | Fields], FD});
 
 from_eep18(V, {Fields}) -> from_eep18(V, {Fields, []});
 from_eep18({V}, {Fields, FormatsDict}) ->

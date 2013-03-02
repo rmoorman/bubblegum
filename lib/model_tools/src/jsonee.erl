@@ -139,6 +139,8 @@ from_eep18({V}, {Fields, FormatsDict}) ->
 %-define(r2, {record, r2, record_info(fields, r2), [{lstofr1, [?r1]}]}).
 -define(r2, ?jsonee(r2, [{lstofr1, [?r1]}])).
 
+-define(dicted, {dict, string, [integer]}).
+
 simple_test() ->
     T = #r1{id = 1, a = 2, b = "3"},
     Json = encode(T, ?r1),
@@ -158,6 +160,20 @@ nested_test() ->
     io:format("REC:  ~p~n", [SS]),
     ?assert(SS == S),
     ok.
+
+dict_test() ->
+    D = [{"one", [1,10,11,12,14,15]}
+        ,{"two", [2, 12]}
+        ,{"three", [3, 13]}
+        ,{"four", [4, 14]}
+        ],
+    Json = encode(D, ?dicted),
+    io:format("JSON: ~p~n", [Json]),
+    DD = decode(Json, ?dicted),
+    io:format("REC:  ~p~n", [DD]),
+    ?assert(DD == D),
+    ok.
+
 
 tuple_test() ->
     T = {[1,2,3], [4,5,6]},

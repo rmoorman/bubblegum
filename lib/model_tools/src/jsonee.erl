@@ -44,9 +44,10 @@
 %% Some local-scope defines
 -define(a2b(Atom), list_to_binary(atom_to_list(Atom))).
 
--type format() :: id | undefined | atom | integer | string
+-type format() :: id | undefined | atom | integer | string | uuid
                 | [format()]  % list 
                 | {[atom()], [{atom(), format()}]} % tuple
+                | {dict, atom(), format()}
                 | {record, atom(), [atom()], [{atom(), format()}]}. % record
 
 %% Encode
@@ -58,6 +59,7 @@ encode(Var, Format) ->
 -spec to_eep18(term(), format()) -> term().
 to_eep18(Var, id)        -> Var;
 to_eep18(Var, undefined) -> Var;
+to_eep18(Var, uuid)      -> to_eep18(Var, string);
 to_eep18(Var, atom)    when is_atom(Var)    -> Var;
 to_eep18(Var, integer) when is_integer(Var) -> Var;
 to_eep18(Var, integer) when is_list(Var)    -> list_to_integer(Var);
@@ -102,6 +104,7 @@ from_eep18(V, atom)    when is_binary(V)  -> list_to_atom(binary_to_list(V));
 from_eep18(V, integer) when is_integer(V) -> V;
 from_eep18(V, string)  when is_binary(V)  -> binary_to_list(V);
 from_eep18(V, string)  when is_integer(V) -> integer_to_list(V);
+from_eep18(V, uuid)    when is_binary(V)  -> V;
 
 from_eep18(V, []) -> V;
 from_eep18(_V, {set, F}) -> F;

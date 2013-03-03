@@ -17,14 +17,14 @@ create_kv_table_uuid(Name) ->
 create_kv_table_biging(Name) ->
     Query = "CREATE TABLE " ++
             atom_to_list(Name) ++ " (" ++
-            "key BIGSERIAL PRIMARY KEY" ++
+            "key BIGSERIAL PRIMARY KEY, " ++
             "value text);",
     migration(Query).
 
 create_kv_table_string(Name) ->
     Query = "CREATE TABLE " ++
             atom_to_list(Name) ++ " (" ++
-            "key text PRIMARY KEY" ++
+            "key text PRIMARY KEY, " ++
             "value text);",
     migration(Query).
 
@@ -36,7 +36,7 @@ migration(Query) ->
     error_logger:info_msg("Migration:~n~s~n", [Query]),
     case ppg:squery(Query) of
         {error, Error} ->
-            error_logger:error_report("While doing ~n    ~s~n"
+            error_logger:error_msg("While doing ~n    ~s~n"
                                       "An error occured has occured:~n    ~p~n",
                                       [Query, Error]),
             {error, Error};

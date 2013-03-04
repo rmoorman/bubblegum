@@ -106,6 +106,7 @@ from_eep18(V, integer) when is_integer(V) -> V;
 from_eep18(V, string)  when is_binary(V)  -> binary_to_list(V);
 from_eep18(V, string)  when is_integer(V) -> integer_to_list(V);
 from_eep18(V, uuid)    when is_binary(V)  -> V;
+from_eep18(undefined, uuid) -> undefined;
 
 from_eep18(V, []) -> V;
 from_eep18(_V, {set, F}) -> F;

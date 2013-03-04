@@ -4,7 +4,8 @@
 -record(profile, {id
                  ,login
                  ,email
-                 ,acl_id
+                 ,role
+                 ,resource
                  ,salt
                  ,password
                  ,dict
@@ -15,7 +16,8 @@
 -define(profile, ?jsonee(profile, [{id, uuid}
                                   ,{login, string}
                                   ,{email, string}
-                                  ,{acl_id, uuid}
+                                  ,{role, uuid}
+                                  ,{resource, uuid}
                                   ,{salt, string}
                                   ,{password, string}
                                   ,?profile_dict

@@ -11,8 +11,10 @@
         ,check_password/2
         ,login/1
         ,id/1
-        ,acl/1
-        ,acl/2
+        ,role/1
+        ,role/2
+        ,resource/1
+        ,resource/2
         ,email/1
         ,email/2
         ,dict/1
@@ -52,8 +54,10 @@ find_by_login(Login) -> model_kv_pg:read(Login, uuid, profiles_logins).
 find_by_email(Email) -> model_kv_pg:read(Email, uuid, profiles_emails).
 
 create(R) ->
-    Id = model_kv_pg:alloc(profiles),
-    NR = R#profile{id = Id},
+    Id       = model_kv_pg:alloc(profiles),
+    Role     = acl:alloc_role(Id),
+    Resource = acl:alloc_resource(Id),
+    NR = R#profile{id = Id, role = Role, resource = Resource},
     model_kv_pg:create(R#profile.login, Id, uuid, profiles_logins),
     model_kv_pg:create(R#profile.email, Id, uuid, profiles_emails),
     model_kv_pg:update(Id, NR, ?profile, profiles),
@@ -73,8 +77,11 @@ check_password(Pass, R) when is_list(Pass) ->
 login(R) -> R#profile.login.
 id(R)    -> R#profile.id.
 
-acl(R) -> R#profile.acl_id.
-acl(Acl, R) -> R#profile{acl_id = Acl}.
+role(R) -> R#profile.role.
+role(Role, R) -> R#profile{role = Role}.
+
+resource(R) -> R#profile.resource.
+resource(Res, R) -> R#profile{resource = Res}.
 
 email(R) -> R#profile.email.
 email(Email, R) -> R#profile{email = Email}.

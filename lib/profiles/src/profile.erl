@@ -29,7 +29,7 @@
 empty(Login) -> #profile{login = Login, dict = []}.
 
 save(R) ->
-    Old = model_kv_pg:read(R#profile.id, profiles),
+    Old = model_kv_pg:read(R#profile.id, ?profile, profiles),
     save(Old, R).
 
 save(#profile{id = Id, email = OEmail, login = OLogin} = _Old,
@@ -71,7 +71,7 @@ password(Pass, R) when is_list(Pass) ->
 
 check_password(Pass, R) when is_list(Pass) ->
     Salt = base64:decode_to_string(R#profile.salt),
-    Hash = base64:encode(erlsha2:sha512(Salt ++ Pass)),
+    Hash = base64:encode_to_string(erlsha2:sha512(Salt ++ Pass)),
     Hash =:= R#profile.password.
 
 login(R) -> R#profile.login.

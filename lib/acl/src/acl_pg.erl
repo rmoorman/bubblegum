@@ -3,6 +3,7 @@
 -export([get_role/1
         ,set_role/1
         ,alloc_role/0
+        ,alloc_role/1
         ,create_role/1
         ,delete_role/1
         ]).
@@ -10,6 +11,7 @@
 -export([get_resource/1
         ,set_resource/1
         ,alloc_resource/0
+        ,alloc_resource/1
         ,create_resource/1
         ,delete_resource/1
         ]).
@@ -25,6 +27,17 @@ set_role(Role) ->
 
 alloc_role() ->
     model_kv_pg:alloc(acl_role).
+
+alloc_role(UUID) ->
+    case model_kv_pg:exists(UUID, acl_role) of
+        true  -> alloc_role();
+        false ->
+            model_kv_pg:create(UUID,
+                               #acl_role{id = UUID, member_of = []},
+                               ?acl_role,
+                               acl_role),
+            UUID
+    end.
 
 create_role(Role) ->
     Id = alloc_role(),
@@ -44,6 +57,18 @@ set_resource(Resource) ->
 
 alloc_resource() ->
     model_kv_pg:alloc(acl_resource).
+
+alloc_resource(UUID) ->
+    case model_kv_pg:exists(UUID, acl_resource) of
+        true  -> alloc_resource();
+        false ->
+            model_kv_pg:create(UUID,
+                               #acl_resource{id = UUID, actions = []},
+                               ?acl_resource,
+                               acl_resource),
+            UUID
+    end.
+
 
 create_resource(Resource) ->
     Id = alloc_resource(),

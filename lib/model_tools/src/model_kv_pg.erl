@@ -7,6 +7,7 @@
         ,read/3
         ,update/4
         ,delete/2
+        ,exists/2
         ]).
 
 alloc(Table) ->
@@ -53,6 +54,12 @@ delete(Key, Table) ->
                            " WHERE key = $1"]),
     ppg:equery(Query, [Key]),
     ok.
+
+exists(Key, Table) ->
+    Query = lists:flatten(["SELECT COUNT(1) FROM ", atom_to_list(Table),
+                           " WHERE key = $1"]),
+    {ok, _, [{Count}]} = ppg:equery(Query, [Key]),
+    Count /= 0.
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

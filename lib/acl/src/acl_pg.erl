@@ -52,8 +52,8 @@ delete_role(#acl_role{id = Id}) ->
 get_resource(ResourceId) ->
     model_kv_pg:read(ResourceId, ?acl_resource, acl_resource).
 
-set_resource(Resource) ->
-    model_kv_pg:update(Resource#acl_resource.id, Resource, ?acl_resource, acl_resource).
+set_resource(#acl_resource{id = Id} = Resource) ->
+    model_kv_pg:update(Id, Resource, ?acl_resource, acl_resource).
 
 alloc_resource() ->
     model_kv_pg:alloc(acl_resource).

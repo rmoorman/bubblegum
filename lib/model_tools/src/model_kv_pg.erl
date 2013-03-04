@@ -12,7 +12,7 @@
 alloc(Table) ->
     Query = lists:flatten(["INSERT INTO ", atom_to_list(Table),
                            " (value) VALUES (NULL) RETURNING key"]),
-    {ok, _, _, [{Key}]} = ppg:equery(Query),
+    {ok, _, _, [{Key}]} = ppg:equery(Query, []),
     Key.
 
 alloc(Key, Table) -> 

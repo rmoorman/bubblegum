@@ -86,6 +86,7 @@ to_eep18(Var, {Fields, FormatsDict}) ->
     Vals = tuple_to_list(Var),
     {[{Name, to_eep18(Val, Fmt)} ||
         {Name, Val} <- lists:zip(Fields, Vals),
+        Val /= undefined,
         begin
             Fmt = proplists:get_value(Name, FormatsDict, id),
             skip /= Fmt

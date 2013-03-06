@@ -11,7 +11,7 @@
 %% Define routing table
 -define(routes, 
         [% Modules
-         {"/",          web_signin}
+         {"/",          web_index}
         ,{"/signin",    web_signin}
         ,{"/signup",    web_signup}
         ,{"/logout",    web_logout}

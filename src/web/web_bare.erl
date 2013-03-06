@@ -1,4 +1,4 @@
--module(www_bare).
+-module(web_bare).
 -compile(export_all).
 -include("web.hrl").
 

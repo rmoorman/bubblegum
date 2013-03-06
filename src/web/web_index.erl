@@ -1,11 +1,10 @@
-%% -*- mode: nitrogen -*-
--module (index).
+-module (web_index).
 -compile(export_all).
 -include_lib("nitrogen_core/include/wf.hrl").
 
 main() -> #template { file="./priv/templates/bare.html" }.
 
-title() -> "Welcome to Nitrogen".
+title() -> "Welcome to Funtester".
 
 body() ->
     #panel {

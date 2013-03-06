@@ -1,4 +1,4 @@
--module(signup).
+-module(web_signup).
 -compile(export_all).
 -include("web.hrl").
 

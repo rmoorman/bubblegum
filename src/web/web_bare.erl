@@ -17,8 +17,8 @@ menu() ->
     end,
     [["Main page", "/", ""]
     ,["Contests", "/contests", ""]
-    ,["Problems", "/problems", ""]
-    ,["About", "/about", ""]
+    ,["Problemset archive", "/problems", ""]
+    ,["About engine", "/about", ""]
     ] ++ Profile.
 
 navbar() ->

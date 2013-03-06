@@ -1,10 +1,10 @@
--module(login).
+-module(signin).
 -compile(export_all).
 -include("web.hrl").
 
 main() -> #template{file = ?tpath "bare.html"}.
 
-title() -> "Login".
+title() -> "Sign In".
 
 body() ->
     #panel {
@@ -21,14 +21,18 @@ inner_body() ->
              ,placeholder = "Email address"
              ,next = password
              ,class="input-block-level"}
-    ,#textbox{id = password
-             ,placeholder = "Password"
+    ,#password{id = password
+             %,placeholder = "Password"
              ,next = submit
              ,class="input-block-level"}
     ,#button{id  = submit
             ,text = "Sign in"
             ,class = "btn btn-large btn-primary"
             ,postback = login}
+    ,#link{id = signup
+          ,text = "Sign Up"
+          ,url = "/signup"
+          ,class="btn btn-large pull-right"}
     ].
 
 bad_login() ->

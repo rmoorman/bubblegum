@@ -7,6 +7,8 @@
         ,drop_kv_table/1
         ,create_kvs_table_uuid/1
         ,drop_kvs_table/1
+        ,create_stream_table_uuid/1
+        ,drop_stream_table/1
         ]).
 
 %% Key Value table
@@ -51,6 +53,27 @@ drop_kvs_table(Name) ->
     Query = "DROP TABLE IF EXISTS " ++ atom_to_list(Name) ++";",
     migration(Query).
 
+
+%% Stream
+%% Stream is (key, value, date) with uniq (key, value).
+
+create_stream_table_uuid(Name) ->
+    QueryT = "CREATE TABLE " ++ atom_to_list(Name) ++ " (" ++
+             "key uuid, " ++
+             "value uuid, " ++
+             "ts timestamp, "
+             "UNIQUE (key, value))",
+    QueryI1 = "CREATE INDEX " ++ atom_to_list(Name) ++ "_key_ts_btree " ++
+              "ON " ++ atom_to_list(Name) ++ " USING btree (key, ts)",
+    QueryI2 = "CREATE INDEX " ++ atom_to_list(Name) ++ "_ts_btree " ++
+              "ON " ++ atom_to_list(Name) ++ " USING btree (ts)",
+    migration(QueryT),
+    migration(QueryI1),
+    migration(QueryI2).
+
+drop_stream_table(Name) ->
+    Query = "DROP TABLE IF EXISTS " ++ atom_to_list(Name) ++";",
+    migration(Query).
 
 migration(Query) ->
     error_logger:info_msg("Migration:~n~s~n", [Query]),

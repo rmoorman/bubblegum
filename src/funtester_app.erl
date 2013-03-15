@@ -10,7 +10,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    ToStart = [sasl, confetti, pg_pool, acl, nprocreg],
+    ToStart = [sasl, confetti, pg_pool, acl, nprocreg, profiles],
     ToLoad  = [mochiweb],
 
     [application:load(App)  || App <- ToLoad ++ ToStart],

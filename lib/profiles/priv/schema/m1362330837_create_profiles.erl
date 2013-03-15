@@ -1,6 +1,6 @@
 -module(m1362330837_create_profiles).
 -export([upgrade/1, downgrade/1]).
--behaviour(sql_migration).
+-behaviour(migrator).
 
 upgrade(_C) ->
     model_migrate:create_kv_table_uuid(profiles),

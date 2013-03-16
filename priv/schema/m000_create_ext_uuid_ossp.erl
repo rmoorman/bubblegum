@@ -5,4 +5,4 @@
         ,downgrade/1]).
 
 upgrade(C) -> model_migrate:migration("CREATE EXTENSION \"uuid-ossp\"").
-downgrade(C) -> model_migrate:migration("DROP EXTENSION IF EXIST \"uuid-ossp\"").
+downgrade(C) -> model_migrate:migration("DROP EXTENSION IF EXISTS \"uuid-ossp\"").

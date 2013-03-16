@@ -1,6 +1,6 @@
 -module(m1361220150_create_role_resource).
 -export([upgrade/1, downgrade/1]).
--behaviour(sql_migration).
+-behaviour(migrator).
 
 upgrade(_C) ->
     model_migrate:create_kv_table_uuid(acl_role),

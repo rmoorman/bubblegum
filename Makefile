@@ -1,7 +1,7 @@
 ERL_EBIN_DIRS=$(shell find $(PWD)/deps $(PWD)/lib $(PWD)/ -maxdepth 2 -name ebin)
 ERL_OPTS= -pa $(ERL_EBIN_DIRS)
 ERL_TEST_OPTS=-boot start_sasl -sasl sasl_error_logger false $(ERL_OPTS)
-ERL_RUN=
+ERL_RUN= -eval 'application:start(funtester).'
 
 REBAR=./rebar
 

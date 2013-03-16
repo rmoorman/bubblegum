@@ -2,6 +2,10 @@
 -module(acl).
 
 -export([ask/3
+        ,alloc_role/1
+        ,alloc_role/0
+        ,alloc_resource/1
+        ,alloc_resource/0
         ,update_precedents/2
         ,set_precedents/2
         ,get_precedents/1
@@ -55,6 +59,13 @@ default_policy(_, _) -> undefined.
 default_policy_list([deny|_]) -> deny;
 default_policy_list([H|T]) -> default_policy(H, default_policy_list(T));
 default_policy_list([]) -> undefined.
+
+%%
+alloc_role()     -> acl_pg:alloc_role().
+alloc_role(UUID) -> acl_pg:alloc_role(UUID).
+
+alloc_resource()     -> acl_pg:alloc_resource().
+alloc_resource(UUID) -> acl_pg:alloc_resource(UUID).
 
 %% @doc Ask for permission
 -spec ask(role_id(), actions(), resource_id()) -> verdicts().

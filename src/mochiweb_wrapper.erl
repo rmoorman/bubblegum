@@ -3,13 +3,12 @@
 %% Reads config and starts some mochi
 
 -module(mochiweb_wrapper).
+-include("web.hrl").
 
 -export([start_link/0
         ,stop/1
         ,process/1
         ]).
-
--define(doc_root, "priv/webroot").
 
 % For supervisor API
 start_link() ->
@@ -37,6 +36,6 @@ process(Req) ->
     ReqBridge = simple_bridge:make_request(mochiweb_request_bridge, {Req, ?doc_root}),
     ResBridge = simple_bridge:make_response(mochiweb_response_bridge, {Req, ?doc_root}),
     nitrogen:init_request(ReqBridge, ResBridge),
-
+    wf_handler:set_handler(named_route_handler, ?routes), % See web.hrl for routes
     nitrogen:run().
 

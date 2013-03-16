@@ -7,12 +7,13 @@
         ,read/3
         ,update/4
         ,delete/2
+        ,exists/2
         ]).
 
 alloc(Table) ->
     Query = lists:flatten(["INSERT INTO ", atom_to_list(Table),
                            " (value) VALUES (NULL) RETURNING key"]),
-    {ok, _, _, [{Key}]} = ppg:equery(Query),
+    {ok, _, _, [{Key}]} = ppg:equery(Query, []),
     Key.
 
 alloc(Key, Table) -> 
@@ -32,14 +33,20 @@ create(Key, Value, Format, Table) ->
     Json = jsonee:encode(Value, Format),
     Query = lists:flatten(["INSERT INTO ", atom_to_list(Table),
                            " (key, value) VALUES ($1, $2)"]),
-    {ok, _, _, [{Key}]} = ppg:equery(Query, [Key, Json]),
+    {ok, _} = ppg:equery(Query, [Key, Json]),
     Key.
 
 read(Key, Format, Table) ->
     Query = lists:flatten(["SELECT value FROM ", atom_to_list(Table),
                            " WHERE key = $1"]),
-    {ok, _, [{Value}|_]} = ppg:equery(Query, [Key]),
-    jsonee:decode(Value, Format).
+    case ppg:equery(Query, [Key]) of
+        {ok, _, [{Value}|_]} ->
+            jsonee:decode(Value, Format);
+        {ok, _, []} ->
+            {error, not_found};
+        {error, Error} ->
+            {error, Error}
+    end.
 
 update(Key, NewValue, Format, Table) ->
     Json = jsonee:encode(NewValue, Format),
@@ -53,6 +60,12 @@ delete(Key, Table) ->
                            " WHERE key = $1"]),
     ppg:equery(Query, [Key]),
     ok.
+
+exists(Key, Table) ->
+    Query = lists:flatten(["SELECT COUNT(1) FROM ", atom_to_list(Table),
+                           " WHERE key = $1"]),
+    {ok, _, [{Count}]} = ppg:equery(Query, [Key]),
+    Count /= 0.
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

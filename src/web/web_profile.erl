@@ -2,11 +2,13 @@
 -export([main/0
         ,left/0
         ,right/0
+        ,title/0
         ]).
 
 -include("web.hrl").
 
-main() -> user(), #template{file = ?tpath "twocols.html"}.
+title() -> User = user(), User:login().
+main()  -> #template{file = ?tpath "twocols.html"}.
 
 user() ->
     User = get(this_user),
@@ -24,10 +26,16 @@ user() ->
 
 left() ->
     Profile = user(),
-    #panel{class="profile-ava", body = 
+    #panel{class="img-polaroid", body = 
            #gravatar{email = Profile:email(), size="210"}}.
 
 right() ->
     Profile = user(),
+    D = Profile:dict(),
     [#h1{text = Profile:login()}
     ,#p{text = "Some information about this person is here."}].
+
+format(_, undefined) -> [];
+format(full_name, FullName) ->
+    #span{text = FullName};
+format(reg_date, Date) -> [].

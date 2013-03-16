@@ -13,6 +13,7 @@
         ,upgrade/1
         ,downgrade/0
         ,upgrade/0
+        ,reset/0
         ]).
 
 
@@ -98,3 +99,4 @@ downgrade(List) ->
 upgrade(  ) -> upgrade(migrations()).
 downgrade() -> downgrade(migrations()).
 
+reset() -> {downgrade(), upgrade()}.

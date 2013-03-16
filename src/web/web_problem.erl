@@ -6,6 +6,7 @@
         ]).
 
 -include("web.hrl").
+-include_lib("problems/include/problem.hrl").
 
 title() -> Problem = ?l(problem), Problem:name().
 main()  -> #template{file = ?tpath "twocols.html"}.
@@ -27,4 +28,14 @@ right() ->
     Problem = ?l(problem),
     [#h2{text = Problem:name()}
     ,#panel{class = "problem-body"
-           ,body = Problem:body()}].
+           ,body = Problem:body()}
+    ,[[#h6{text = R#input_line.label}, field(R)] || R <- Problem:input()]
+    ,#link{class = "btn btn-primary", postback = submit, text = "Submit"}
+    ].
+
+field(#input_line{type = file} = R) ->
+    #textarea{id = R#input_line.id}.
+
+
+event(submit) ->
+    ok.

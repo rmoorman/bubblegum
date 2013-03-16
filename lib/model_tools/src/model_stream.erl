@@ -1,36 +1,53 @@
 -module(model_stream).
 
--export([find_last_by_key/2
-        ,find_last_by_key/4
-        ,find_last/1
-        ,find_last/3
+-export([find_last_by_key/3
+        ,find_last_by_key/5
+        ,find_last/2
+        ,find_last/4
         ,create/4
-        ,delete/3
+        ,create/5
+        ,delete/2
         ]).
 -define(def_limit, 30).
 
 
-find_last_by_key(Key, Table) -> find_last_by_key(Key, 0, ?def_limit, Table).
-find_last_by_key(Key, Offset, Limit, Table) ->
-    Query = select(value_ts, Table, {key, $=, "$1"}, desc, {Offset, Limit}),
+find_last_by_key(Key, Scheme, Table) -> 
+    find_last_by_key(Key, 0, ?def_limit, Scheme, Table).
+
+find_last_by_key(Key, Offset, Limit, Scheme, Table) ->
+    Query = select(value_ts,
+                   Table, {key, $=, "$1"}, desc, {Offset, Limit}),
     {ok, _, Ans} = ppg:equery(Query, [Key]),
-    {ok, Ans}.
+    {ok, [{jsonee:decode(Value, Scheme), Ts} ||
+            {Value, Ts} <- Ans]}.
 
-find_last(Table) -> find_last(0, ?def_limit, Table).
-find_last(Offset, Limit, Table) ->
-    Query = select([key, value, ts], Table, [], desc, [Offset, Limit]),
+find_last(Scheme, Table) -> find_last(0, ?def_limit, Scheme, Table).
+find_last(Offset, Limit, Scheme, Table) ->
+    Query = select([id, key, value, ts],
+                   Table, [], desc, {Offset, Limit}),
     {ok, _, Ans} = ppg:equery(Query, []),
-    {ok, Ans}.
+    {ok, [{Id, Key, jsonee:decode(Value, Scheme), Ts} ||
+            {Id, Key, Value, Ts} <- Ans]}.
 
-create(Key, Value, Timestamp, Table) ->
+create(Key, Value, Scheme, Table) ->
+   Query = [<<"INSERT INTO ">>, atom_to_list(Table)
+            ,<<" (key, value) VALUES ($1, $2) RETURNING id">>],
+    {ok, _, _, [{Id}]} 
+        = ppg:equery(Query, [Key, jsonee:encode(Value, Scheme)]),
+    {ok, Id}.
+
+create(Key, Value, Scheme, Timestamp, Table) ->
     Query = [<<"INSERT INTO ">>, atom_to_list(Table)
-            ,<<" (key, value, ts) VALUES ($1, $2, $3) ">>],
-    ppg:equery(Query, [Key, Value, Timestamp]).
+            ,<<" (key, ts, value) VALUES ($1, $2, $3, $4) RETURNING id">>],
+    {ok, _, _, [{Id}]} 
+        = ppg:equery(Query, [Key, Timestamp, jsonee:encode(Value, Scheme)]),
+    {ok, Id}.
 
-delete(Key, Value, Table) ->
+delete(Id, Table) ->
     Query = [<<"DELETE FROM ">>, atom_to_list(Table)
-            ,<<" WHERE key = $1 AND value = $2">>],
-    ppg:equery(Query, [Key, Value]).
+            ,<<" WHERE id = $1">>],
+    ppg:equery(Query, [Id]).
+
 
 %% Internal
 select(Fields, Table, Where, Order, OffsetLimit) ->

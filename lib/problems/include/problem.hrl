@@ -1,31 +1,6 @@
 
 -include_lib("model_tools/include/model.hrl").
 
--record(problem, 
-        {id
-        ,name
-        ,tags
-        ,body
-        ,file
-        ,acl}).
-
--define(problem,
-        ?jsonee(problem, [{id, uuid}
-                         ,{name, string}
-                         ,{tags, [string]}
-                         ,{body, string}
-                         ,{acl, uuid}
-                         ,{file, uuid}])).
-
--define(problem_short,
-        ?jsonee(problem, [{id, uuid}
-                         ,{name, string}
-                         ,{tags, [string]}
-                         ,{body, skip}
-                         ,{acl, uuid}
-                         ,{file, uuid}])).
-
-
 -record(input_line,
         {id
         ,type
@@ -35,8 +10,8 @@
         }).
 
 -define(input_line,
-        ?jsonee(input_line, [{id, string}
-                            ,{type, string}
+        ?jsonee(input_line, [{id, atom}
+                            ,{type, atom}
                             ,{label, string}
                             ,{comment, string}
                             ,{variants, [string]}])).
@@ -49,9 +24,41 @@
         ,comment
         }).
 -define(output_line,
-        ?jsonee(output_line, [{id, string}
-                             ,{type, string}
+        ?jsonee(output_line, [{id, atom}
+                             ,{type, atom}
                              ,{label, string}
                              ,{comment, string}])).
+-define(output, [?output_line]).
+                  
+
+-record(problem, 
+        {id
+        ,name
+        ,tags
+        ,body
+        ,file
+        ,acl
+        ,input
+        ,output}).
+
+-define(problem,
+        ?jsonee(problem, [{id, uuid}
+                         ,{name, string}
+                         ,{tags, [string]}
+                         ,{body, string}
+                         ,{acl, uuid}
+                         ,{file, uuid}
+                         ,{input, ?input}
+                         ,{output, ?output}])).
+
+-define(problem_short,
+        ?jsonee(problem, [{id, uuid}
+                         ,{name, string}
+                         ,{tags, [string]}
+                         ,{body, skip}
+                         ,{acl, uuid}
+                         ,{file, uuid}]
+                         ,{input, ?input}
+                         ,{output, ?output}])).
 
 

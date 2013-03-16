@@ -45,7 +45,7 @@ installed_migrations() ->
             install_table(),
             [];
         {ok, _, List} ->
-            [list_to_atom(binary_to_list(Module)) || {Module, _} <- List]
+            [list_to_atom(binary_to_list(Module)) || {Module} <- List]
     end.
 
 install_table() ->
@@ -67,11 +67,16 @@ install_migration(ModuleName, Action)
     Query = "INSERT INTO migrations_log "
              "(migration_id, action, event, comment) VALUES ($1, $2, $3, $4) "
              "RETURNING log_id",
+    QueryIns = case Action of
+        upgrade   -> "INSERT INTO migrations (migration_id) VALUES ($1)";
+        downgrade -> "DELETE FROM migrations WHERE migration_id = $1"
+    end,
 
     ppg:equery(Query, [atom_to_list(A) || A <- [ModuleName, Action, start, '']]),
     Connection = ppg:get_conn(),
     case ModuleName:Action(Connection) of
         ok -> 
+            ppg:equery(QueryIns, [atom_to_list(ModuleName)]),
             ppg:equery(Query,
                        [atom_to_list(A) || A <- [ModuleName, Action, finish_ok, '']]),
             ok;
@@ -92,7 +97,7 @@ upgrade(List) ->
 downgrade(Atom) when is_atom(Atom) -> downgrade([Atom]);
 downgrade(List) ->
     Installed = installed_migrations(),
-    ToUninstall = List -- (List -- Installed),
+    ToUninstall = lists:reverse(List -- (List -- Installed)),
     io:format("Uninstalling: ~p~n", [ToUninstall]),
     [install_migration(M, downgrade) || M <- ToUninstall].
 

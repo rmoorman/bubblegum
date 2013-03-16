@@ -2,10 +2,10 @@
 
 -export([migration/1
         ,create_kv_table_uuid/1
-        ,create_kv_table_biging/1
         ,create_kv_table_string/1
         ,drop_kv_table/1
         ,create_kvs_table_uuid/1
+        ,create_kvs_table_text/1
         ,drop_kvs_table/1
         ,create_stream_table_uuid/1
         ,drop_stream_table/1
@@ -16,13 +16,6 @@ create_kv_table_uuid(Name) ->
     Query = "CREATE TABLE " ++
             atom_to_list(Name) ++ " (" ++
             "key uuid PRIMARY KEY DEFAULT uuid_generate_v4(), " ++
-            "value text);",
-    migration(Query).
-
-create_kv_table_biging(Name) ->
-    Query = "CREATE TABLE " ++
-            atom_to_list(Name) ++ " (" ++
-            "key BIGSERIAL PRIMARY KEY, " ++
             "value text);",
     migration(Query).
 
@@ -42,6 +35,16 @@ drop_kv_table(Name) ->
 create_kvs_table_uuid(Name) ->
     QueryT = "CREATE TABLE " ++ atom_to_list(Name) ++ " (" ++
              "value uuid, " ++
+             "key uuid, " ++
+             "UNIQUE (key, value))",
+    QueryI = "CREATE INDEX " ++ atom_to_list(Name) ++ "_value_btree " ++
+             "ON " ++ atom_to_list(Name) ++ " USING btree (value)",
+    migration(QueryT),
+    migration(QueryI).
+
+create_kvs_table_text(Name) ->
+    QueryT = "CREATE TABLE " ++ atom_to_list(Name) ++ " (" ++
+             "value TEXT, " ++
              "key uuid, " ++
              "UNIQUE (key, value))",
     QueryI = "CREATE INDEX " ++ atom_to_list(Name) ++ "_value_btree " ++

@@ -58,11 +58,11 @@ drop_kvs_table(Name) ->
 %% Stream is (key, value, date) with uniq (key, value).
 
 create_stream_table_uuid(Name) ->
-    QueryT = "CREATE TABLE " ++ atom_to_list(Name) ++ " (" ++
-             "key uuid, " ++
-             "value uuid, " ++
-             "ts timestamp, "
-             "UNIQUE (key, value))",
+    QueryT = "CREATE TABLE " ++ atom_to_list(Name) ++ " (" 
+             "id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), " 
+             "key uuid, " 
+             "value TEXT, "
+             "ts timestamp DEFAULT now()) ",
     QueryI1 = "CREATE INDEX " ++ atom_to_list(Name) ++ "_key_ts_btree " ++
               "ON " ++ atom_to_list(Name) ++ " USING btree (key, ts)",
     QueryI2 = "CREATE INDEX " ++ atom_to_list(Name) ++ "_ts_btree " ++
@@ -80,8 +80,8 @@ migration(Query) ->
     case ppg:squery(Query) of
         {error, Error} ->
             error_logger:error_msg("While doing ~n    ~s~n"
-                                      "An error occured has occured:~n    ~p~n",
-                                      [Query, Error]),
+                                   "An error occured has occured:~n    ~p~n",
+                                   [Query, Error]),
             {error, Error};
         _Ok -> ok
     end.

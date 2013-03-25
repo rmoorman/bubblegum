@@ -7,30 +7,22 @@
 
 -include("web.hrl").
 
-title() -> User = user(), User:login().
+title() -> User = ?l(user), User:login().
 main()  -> #template{file = ?tpath "twocols.html"}.
 
 user() ->
-    User = get(this_user),
-    if
-        User == undefined ->
-            [Login|_] = string:tokens(wf_context:path_info(), "/"),
-            UID = profile:find_by_login(Login),
-            Profile = profile:load(UID),
-            put(this_user, Profile),
-            Profile;
-        true ->
-            User
-    end.
+    [Login|_] = string:tokens(wf_context:path_info(), "/"),
+    UID = profile:find_by_login(Login),
+    profile:load(UID).
 
 
 left() ->
-    Profile = user(),
+    Profile = ?l(user),
     #panel{class="img-polaroid", body = 
            #gravatar{email = Profile:email(), size="210"}}.
 
 right() ->
-    Profile = user(),
+    Profile = ?l(user),
     D = Profile:dict(),
     [#h1{text = Profile:login()}
     ,#p{text = "Some information about this person is here."}].

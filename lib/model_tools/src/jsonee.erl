@@ -107,9 +107,11 @@ from_eep18(V, string)  when is_binary(V)  -> binary_to_list(V);
 from_eep18(V, string)  when is_integer(V) -> integer_to_list(V);
 from_eep18(V, uuid)    when is_binary(V)  -> V;
 from_eep18(undefined, uuid) -> undefined;
+from_eep18(undefined, string) -> undefined;
 
 from_eep18(V, []) -> V;
 from_eep18(_V, {set, F}) -> F;
+from_eep18(undefined, [_]) -> undefined;
 from_eep18(V, [Format]) -> [from_eep18(I, Format) || I <- V];
 
 from_eep18({V}, {dict, FmtK, FmtV}) 
@@ -130,7 +132,8 @@ from_eep18({V}, {Fields, FormatsDict}) ->
                 Fmt = proplists:get_value(I, FormatsDict, id),
                 true
             end],
-    list_to_tuple(List).
+    list_to_tuple(List);
+from_eep18(undefined, _) -> undefined.
 
 %% Tests
 -ifdef(TEST).

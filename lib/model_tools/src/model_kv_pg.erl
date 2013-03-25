@@ -23,10 +23,10 @@ alloc(Key, Table) ->
     Key.
 
 create(Value, Format, Table) ->
-    Value = jsonee:encode(Value, Format),
+    Json = jsonee:encode(Value, Format),
     Query = lists:flatten(["INSERT INTO ", atom_to_list(Table),
-                           " (value) VALUES ($1)"]),
-    {ok, _, _, [{Key}]} = ppg:equery(Query, [Value]),
+                           " (value) VALUES ($1) RETURNING key"]),
+    {ok, _, _, [{Key}]} = ppg:equery(Query, [Json]),
     Key.
 
 create(Key, Value, Format, Table) ->

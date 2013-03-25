@@ -1,0 +1,11 @@
+{application, problems,
+ [
+  {description, "Model for problems"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.

@@ -78,21 +78,21 @@ find_from(Key, Format, Table) ->
     find_from(Key, Format, Table, ?def_limit).
 
 find_from(Key, Format, Table, Limit) ->
-    Query = pg_helpers:select(key_value, Table, {key, gte, "$1"}
+    Query = pg_helpers:select(key_value, Table, [{key, gte, "$1"}, {is_not_null, value}]
                              ,{asc, key}, {limit, Limit}),
     {ok, _, Answer} = ppg:equery(Query, [Key]),
     {ok, [jsonee:decode(Value, Format)
-          || Value <- Answer]}.
+          || {_Key, Value} <- Answer]}.
 
 find_till(Key, Format, Table) ->
     find_till(Key, Format, Table, ?def_limit).
 
 find_till(Key, Format, Table, Limit) ->
-    Query = pg_helpers:select(key_value, Table, {key, lte, "$1"}
+    Query = pg_helpers:select(key_value, Table, [{key, lte, "$1"}, {is_not_null, value}]
                              ,{desc, key}, {limit, Limit}),
     {ok, _, Answer} = ppg:equery(Query, [Key]),
     {ok, [jsonee:decode(Value, Format)
-          || Value <- Answer]}.
+          || {_Key, Value} <- Answer]}.
                               
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

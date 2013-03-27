@@ -27,7 +27,7 @@ select(Fields, Table, Where, Order, OffsetLimit) ->
     LimitSQL = case OffsetLimit of
         "" -> "";
         {from, From}  -> [<<" OFFSET ">>, integer_to_list(From)];
-        {to,   Count} -> [<<" LIMIT ">>,  integer_to_list(Count)];
+        {limit,Count} -> [<<" LIMIT ">>,  integer_to_list(Count)];
         {From, Count} -> [<<" OFFSET ">>, integer_to_list(From)
                          ,<<"  LIMIT ">>, integer_to_list(Count)]
     end,
@@ -53,7 +53,14 @@ fields(Fields) ->
 where([]) -> [];
 where([Head]) -> where(Head);
 where([Head|Tail]) -> [<<"((">>, where(Head), <<") AND (">>, where(Tail), <<"))">>];
-where({$!, Cond}) -> [<<" NOT (">>, where(Cond), <<")">>];
+where(Atom) when is_atom(Atom) -> fields(Atom);
+where({Op, Cond}) -> 
+    {SqlOp1, SqlOp2} = case Op of
+        $!      -> {<<"NOT ">>, []};
+        is_null -> {[], <<" IS NULL">>};
+        is_not_null -> {[], <<" IS NOT NULL">>}
+    end,
+    [SqlOp1, <<"(">>, where(Cond), <<")">>, SqlOp2];
 where({Field, Op, Value}) ->
     SqlOp = case Op of
         $<  -> <<" < ">>;

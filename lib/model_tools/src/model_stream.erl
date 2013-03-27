@@ -8,8 +8,7 @@
         ,create/5
         ,delete/2
         ]).
--define(def_limit, 30).
-
+-include("model.hrl").
 
 find_last_by_key(Key, Scheme, Table) -> 
     find_last_by_key(Key, 0, ?def_limit, Scheme, Table).

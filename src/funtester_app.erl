@@ -10,12 +10,16 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    ToStart = [sasl, confetti, pg_pool, model_tools,
-               acl, nprocreg, profiles, problems],
-    ToLoad  = [mochiweb],
+    ToStart = [sasl, crypto,
+               confetti, pg_pool, model_tools,
+               acl, profiles, problems,
+               ranch, cowboy],
+    ToLoad  = [],
 
     [application:load(App)  || App <- ToLoad ++ ToStart],
-    [application:start(App) || App <- ToStart],
+    [ok = application:start(App) || App <- ToStart],
+
+    cowboy_wrapper:start(),
 
     funtester_sup:start_link().
 

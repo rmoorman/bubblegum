@@ -40,8 +40,10 @@ read(Key, Format, Table) ->
     Query = lists:flatten(["SELECT value FROM ", atom_to_list(Table),
                            " WHERE key = $1"]),
     case ppg:equery(Query, [Key]) of
+        {ok, _, [{null}]} ->
+            {ok, null};
         {ok, _, [{Value}|_]} ->
-            jsonee:decode(Value, Format);
+            {ok, jsonee:decode(Value, Format)};
         {ok, _, []} ->
             {error, not_found};
         {error, Error} ->

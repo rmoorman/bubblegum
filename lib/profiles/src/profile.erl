@@ -56,8 +56,7 @@ find_by_email(Email) -> model_kv_pg:read(Email, uuid, profiles_emails).
 create(R) ->
     Id       = model_kv_pg:alloc(profiles),
     Role     = acl:alloc_role(Id),
-    Resource = acl:alloc_resource(Id),
-    NR = R#profile{id = Id, role = Role, resource = Resource},
+    NR = R#profile{id = Id, role = Role},
     model_kv_pg:create(R#profile.login, Id, uuid, profiles_logins),
     model_kv_pg:create(R#profile.email, Id, uuid, profiles_emails),
     model_kv_pg:update(Id, NR, ?profile, profiles),
@@ -74,14 +73,14 @@ check_password(Pass, R) when is_list(Pass) ->
     Hash = base64:encode_to_string(erlsha2:sha512(Salt ++ Pass)),
     Hash =:= R#profile.password.
 
+hash_password(R) -> password(R#profile.password, R).
+
 login(R) -> R#profile.login.
 id(R)    -> R#profile.id.
+id(Id, R) -> R#profile{id = Id}.
 
 role(R) -> R#profile.role.
 role(Role, R) -> R#profile{role = Role}.
-
-resource(R) -> R#profile.resource.
-resource(Res, R) -> R#profile{resource = Res}.
 
 email(R) -> R#profile.email.
 email(Email, R) -> R#profile{email = Email}.

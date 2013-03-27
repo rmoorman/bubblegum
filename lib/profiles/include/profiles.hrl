@@ -5,7 +5,6 @@
                  ,login
                  ,email
                  ,role
-                 ,resource
                  ,salt
                  ,password
                  ,dict
@@ -17,7 +16,6 @@
                                   ,{login, string}
                                   ,{email, string}
                                   ,{role, uuid}
-                                  ,{resource, uuid}
                                   ,{salt, string}
                                   ,{password, string}
                                   ,?profile_dict

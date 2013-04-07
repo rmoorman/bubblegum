@@ -44,15 +44,23 @@ body(R) -> R#problem.body.
 body(Body, R) -> R#problem{body = Body}.
 
 load(Id) -> 
-    R = model_kv_pg:read(Id, ?problem, problems),
-    R#problem{id = Id}.
+    model_kv_pg:read(Id, ?problem, problems).
 
-save(R) -> save(load(R#problem.id), R). 
+save(R) -> save(load(R#problem.id), R),
+    case load(R#problem.id) of
+        {ok, null} -> create(R);
+        {ok, Old}  -> save(Old, R);
+        {error, not_found} -> create(R)
+    end.
+
 save(Old, R) ->
     model_kv_pg:update(R#problem.id, R, ?problem, problems).
 
 create(R) ->
-    Id = model_kv_pg:alloc(problems),
+    Id = case R#problem.id of
+        undefined -> model_kv_pg:alloc(problems);
+        Q -> Q
+    end,
     model_kv_pg:update(Id, R#problem{id = Id}, ?problem, problems),
     R#problem{id = Id}.
 

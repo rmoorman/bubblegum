@@ -17,6 +17,11 @@
         ,input/2
         ,output/1
         ,output/2
+        ,from_json/1
+        ,to_json/1
+        ,find_from/2
+        ,find_till/2
+        ,merge/2
         ]).
 
 -include("problem.hrl").
@@ -81,5 +86,24 @@ output(R) ->
 output(Output, R) ->
     R#problem{output = Output}.
 
+find_from(Key, Limit) ->
+    model_kv_pg:find_from(Key, ?problem, problems, Limit).
 
+find_till(Key, Limit) ->
+    model_kv_pg:find_till(Key, ?problem, problems, Limit).
+
+to_json(Rs) when is_list(Rs) ->
+    jsonee:encode(Rs, [?problem]);
+to_json(R) when is_tuple(R)->
+    jsonee:encode(R, ?problem).
+
+from_json(Json) ->
+    jsonee:decode(Json, ?problem).
+
+merge(New, Old) ->
+    List = record_info(fields, problem),
+    jsonee:merge(fun merge/3, List, New, Old).
+
+merge(_, undefined, Old) -> Old;
+merge(_, New, _)         -> New.
 

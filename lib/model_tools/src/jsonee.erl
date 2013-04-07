@@ -37,6 +37,7 @@
         ,from_eep18/2
         ,encode/2
         ,decode/2
+        ,merge/4
         ]).
 
 -include("model.hrl").
@@ -135,6 +136,16 @@ from_eep18({V}, {Fields, FormatsDict}) ->
     list_to_tuple(List);
 from_eep18(undefined, _) -> undefined.
 
+
+%% Merge
+%% Merge by fact has nothing to json,
+%% but I don't know about better module where I can place It.
+merge(Function, List, R1, R2) ->
+    [Tag|L1] = tuple_to_list(R1),
+    [Tag|L2] = tuple_to_list(R2),
+    Merged = lists:zipwith3(Function, List, L1, L2),
+    tuple_to_list([Tag|Merged]).
+                      
 %% Tests
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

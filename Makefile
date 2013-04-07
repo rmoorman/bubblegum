@@ -22,6 +22,9 @@ distclean: rebar
 deps: rebar
 	$(REBAR) get-deps
 
+fcompile: rebar
+	$(REBAR) skip_deps=true compile
+
 compile: rebar
 	$(REBAR) compile
 

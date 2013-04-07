@@ -21,7 +21,7 @@
         ,from_json/2
         ]).
 
--import_lib("model_tools/include/model.hrl").
+-include_lib("model_tools/include/model.hrl").
 
 init(_, _, []) ->
     {upgrade, protocol, cowboy_rest}.
@@ -71,7 +71,7 @@ to_json(R, index = S) ->
     {From, R2} = cowboy_req:qs_val(<<"from">>, R, ?uuid_min),
     {Till, R3} = cowboy_req:qs_val(<<"till">>, R2, ?uuid_max),
     {Order, R4}= cowboy_req:qs_val(<<"order">>, R3, <<"asc">>),
-    Ans = case Order of
+    {ok, Ans} = case Order of
         <<"asc">>  -> RSRS:find_from(From);
         <<"desc">> -> RSRS:find_till(To)
     end,
@@ -96,7 +96,11 @@ from_json(R, {id, Id}) ->
 delete_resource(R, {resource, Resource}) ->
     Deleted = Resource:deleted(true),
     Deleted:save(),
-    {true, R, {resource, Deleted}}.
+    {true, R, {resource, Deleted}};
+
+% DELETE /RSRSs
+delete_resource(R, index = S) ->
+    {true, R, S}.
 
 
 -ifdef(TEST).

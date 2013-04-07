@@ -100,12 +100,19 @@ deleted(R) -> R#profile.deleted =:= true.
 deleted(true, R) ->R#profile{deleted = true};
 deleted(false, R) -> R#profile{deleted = undefined}.
 
-from_json(Json) -> jsonee:decode(Json, ?profile).
-to_json(R) -> 
+from_json(Json) -> 
+    jsonee:decode(Json, ?profile).
+
+to_json(Rs) when is_list(Rs) ->
+    jsonee:encode([prepare(R) || R <- Rs], [?profile]);
+to_json(R) when is_tuple(R) -> 
+    jsonee:encode(prepare(R), ?profile).
+
+prepare(R) ->
     Deleted = case R#profile.deleted of
         undefined -> false;
         true -> true
     end,
-    jsonee:encode(R#profile{email = undefined, salt = undefined
-                           ,password = undefined, deleted = Deleted}, ?profile).
+    R#profile{email = undefined, salt = undefined
+                           ,password = undefined, deleted = Deleted}.
 

@@ -10,6 +10,7 @@
         ,load/1
         ,save/1
         ,create/3
+        ,close/1
         ]).
 
 -include("session.hrl").
@@ -36,6 +37,8 @@ create(User, Acl, Bag) ->
 save(R) ->
     session_keeper:save(R).
 
+close(R) ->
+    session_keeper:close(R).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").

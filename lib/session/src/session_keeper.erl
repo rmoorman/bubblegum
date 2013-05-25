@@ -107,7 +107,7 @@ handle_call({create, Record}, _, State) ->
     {reply, {ok, NewRecord}, State};
 handle_call({close, Record}, _, State) ->
     ets:delete(State#state.h2rec, Record#session.token),
-    {replay, ok, State};
+    {reply, ok, State};
 handle_call(stop, _, State) ->
     {stop, normal, ok, State}.
 

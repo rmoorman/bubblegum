@@ -43,7 +43,7 @@ create_role(Role) ->
     Id = alloc_role(),
     NRole = Role#acl_role{id = Id},
     set_role(NRole),
-    NRole.
+    {ok, NRole}.
 
 delete_role(#acl_role{id = Id}) ->
     model_kv_pg:delete(Id, acl_role).

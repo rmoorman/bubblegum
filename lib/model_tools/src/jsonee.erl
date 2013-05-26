@@ -66,6 +66,7 @@ to_eep18(Var, integer) when is_integer(Var) -> Var;
 to_eep18(Var, integer) when is_list(Var)    -> list_to_integer(Var);
 to_eep18(Var, string)  when is_list(Var)    -> list_to_binary(Var);
 to_eep18(Var, string)  when is_binary(Var)  -> Var;
+to_eep18(Var, string)  when is_atom(Var)    -> list_to_binary(atom_to_list(Var));
 to_eep18(Var, string)  when is_integer(Var) -> list_to_binary(integer_to_list(Var));
 
 % Complex structs

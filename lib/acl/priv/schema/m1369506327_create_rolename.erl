@@ -5,10 +5,10 @@
         ,downgrade/1]).
 
 upgrade(_C) -> 
-    model_migrator:create_kv_table_uuid(acl_rolename),
-    model_migrator:create_kv_table_string(acl_namerole).
+    model_migrate:create_kv_table_uuid(acl_rolename),
+    model_migrate:create_kv_table_string(acl_namerole).
 
 downgrade(_C) ->
-    model_migrator:drop_kv_table(acl_rolename),
-    model_migrator:drop_kv_table(acl_namerole).
+    model_migrate:drop_kv_table(acl_rolename),
+    model_migrate:drop_kv_table(acl_namerole).
 

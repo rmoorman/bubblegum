@@ -11,11 +11,9 @@
 -define(r2n, acl_rolename).
 -define(n2r, acl_namerole).
 
--define(tostr(Q), jsonee:to_eep18(Q, string)).
-
 add(Role, Name) ->
     ?u:create(Role, Name, string, ?r2n),
-    ?u:create(?tostr(Name), Role, uuid, ?n2r).
+    ?u:create(Name, Role, uuid, ?n2r).
 
 delete(Role) ->
     {ok, Name} = get_name(Role),
@@ -23,11 +21,11 @@ delete(Role) ->
     ?u:delete(Name, ?n2r).
 
 get_role(Name) ->
-    ?u:read(?tostr(Name), uuid, ?n2r).
+    ?u:read(Name, uuid, ?n2r).
 
 get_name(Role) ->
     ?u:read(Role, string, ?r2n).
 
 exists(Name) ->
-    ?u:exists(?tostr(Name), ?n2r).
+    ?u:exists(Name, ?n2r).
 

@@ -71,6 +71,8 @@ create(R) ->
     NR.
 
 password(Pass, R) when is_list(Pass) ->
+    % FIXME I really dont think that this method with random uniform
+    % is secure
     Salt = [random:uniform(255) || _ <- lists:seq(1, ?salt_size)],
     Hash     = base64:encode(erlsha2:sha512(Salt ++ Pass)),
     BaseSalt = base64:encode(Salt),

@@ -43,7 +43,7 @@ create_role(Role) ->
     Id = alloc_role(),
     NRole = Role#acl_role{id = Id},
     set_role(NRole),
-    NRole.
+    {ok, NRole}.
 
 delete_role(#acl_role{id = Id}) ->
     model_kv_pg:delete(Id, acl_role).
@@ -56,7 +56,9 @@ set_resource(#acl_resource{id = Id} = Resource) ->
     model_kv_pg:update(Id, Resource, ?acl_resource, acl_resource).
 
 alloc_resource() ->
-    model_kv_pg:alloc(acl_resource).
+    Uuid = model_kv_pg:alloc(acl_resource),
+    set_resource(#acl_resource{id = Uuid, actions = []}),
+    Uuid.
 
 alloc_resource(UUID) ->
     case model_kv_pg:exists(UUID, acl_resource) of

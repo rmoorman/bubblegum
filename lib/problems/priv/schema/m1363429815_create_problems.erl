@@ -11,5 +11,5 @@ upgrade(_C) ->
 downgrade(_C) ->
     model_migrate:drop_kv_table(problems),
     model_migrate:drop_kvs_table(problems_tags),
-    model_migrate:drop_stream(problems_stream).
+    model_migrate:drop_stream_table(problems_stream).
 

@@ -1,0 +1,12 @@
+{application, session,
+ [
+  {description, "An ets-based session storage"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { session_app, []}},
+  {env, []}
+ ]}.

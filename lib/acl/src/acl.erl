@@ -2,7 +2,6 @@
 -module(acl).
 
 -export([ask/3
-        ,alloc_role/1
         ,alloc_role/0
         ,alloc_resource/1
         ,alloc_resource/0
@@ -60,9 +59,12 @@ default_policy_list([deny|_]) -> deny;
 default_policy_list([H|T]) -> default_policy(H, default_policy_list(T));
 default_policy_list([]) -> undefined.
 
+new_role() ->
+    #acl_role{member_of = []}.
 %%
-alloc_role()     -> acl_pg:alloc_role().
-alloc_role(UUID) -> acl_pg:alloc_role(UUID).
+alloc_role() ->
+    {ok, #acl_role{id = Uuid}} = ?u:create_role(new_role()),
+    {ok, Uuid}.
 
 alloc_resource()     -> acl_pg:alloc_resource().
 alloc_resource(UUID) -> acl_pg:alloc_resource(UUID).
@@ -76,7 +78,8 @@ ask(Role, Action, Resource) when is_atom(Action) ->
     end;
 
 ask(RoleId, Actions, ResourceId) ->
-    Resource = (?u:get_resource(ResourceId))#acl_resource.actions,
+    {ok, Res} = ?u:get_resource(ResourceId),
+    Resource = Res#acl_resource.actions,
     [default_policy(ask_(RoleId, Action, Resource, []))
      || Action <- Actions].
 
@@ -88,7 +91,7 @@ ask_(RoleId, Action, Resource, Visited) ->
         IsDeny -> deny;
         IsAllow -> allow;
         true ->
-            Role = ?u:get_role(RoleId),
+            {ok, Role} = ?u:get_role(RoleId),
             NVis = ordsets:add_element(RoleId, Visited),
             default_policy_list([
                     ask_(RID, Action, Resource, NVis)
@@ -108,7 +111,7 @@ update_precedents(ResourceId, Precedents) ->
     Old = [{{Role, Act}, Verd} || {Role, Act, Verd} <- get_precedents(ResourceId)],
     Upd = [{{Role, Act}, Verd} || {Role, Act, Verd} <- Precedents],
     Fun = fun (_K, _V1, V2) -> V2 end,
-    New = orddict:merge(Fun, Old, Upd),
+    New = orddict:merge(Fun, Old, ordsets:from_list(Upd)),
     set_precedents(ResourceId, New).
 
 %% @doc Fully rewrites a precedent list for the given resource
@@ -121,24 +124,32 @@ set_precedents(ResourceId, Precedents) ->
         [RID || {RID, Act, allow} <- Precedents, Act == Action],
         [RID || {RID, Act, deny}  <- Precedents, Act == Action]}}
                || Action <- Names],
-    Resource = ?u:get_resource(ResourceId),
-    ?u:set_precedents(Resource#acl_resource{actions = Actions}),
+    Resource = case ?u:get_resource(ResourceId) of
+        {ok, Rr} -> Rr;
+        _ -> {ok, Pr} = ?u:get_resource(?u:alloc_resource(ResourceId)),
+            Pr
+    end,
+    ?u:set_resource(Resource#acl_resource{actions = Actions}),
     Precedents.
 
 %% @doc Gets all precedents for the given resource
 -spec get_precedents(resource_id()) -> precedents().
 get_precedents(ResourceId) ->
-    #acl_resource{actions = Acts} = ?u:get_resource(ResourceId),
-    [{RoleId, Action, deny} || {Action, {_, Roles}} <- Acts,
-                               RoleId <- Roles]
-    ++
-    [{RoleId, Action, allow} || {Action , {Roles, _}} <- Acts,
-                                RoleId <- Roles].
+    case ?u:get_resource(ResourceId) of
+        {ok, #acl_resource{actions = Acts}} ->
+            [{RoleId, Action, deny} || {Action, {_, Roles}} <- Acts,
+                                       RoleId <- Roles]
+            ++
+            [{RoleId, Action, allow} || {Action , {Roles, _}} <- Acts,
+                                        RoleId <- Roles];
+        _ ->
+            []
+    end.
 
 %% @doc Gets primary roles for the given role
 -spec get_roles(role_id()) -> [role_id()].
 get_roles(RoleId) ->
-    Role = ?u:get_role(RoleId),
+    {ok, Role} = ?u:get_role(RoleId),
     Role#acl_role.member_of.
 
 
@@ -156,7 +167,7 @@ get_all_roles_([Current|Tail], Visited) ->
 %% @doc Add roles for the given role
 -spec add_roles(role_id(), [role_id()]) -> answer().
 add_roles(RoleId, Roles) ->
-    Role = ?u:get_role(RoleId),
+    {ok, Role} = ?u:get_role(RoleId),
     RolesList = ordsets:from_list(Roles),
     NRole = Role#acl_role{member_of = ordsets:union(
                 Role#acl_role.member_of, RolesList)},
@@ -165,7 +176,7 @@ add_roles(RoleId, Roles) ->
 %% @doc Remove roles for the given role
 -spec delete_roles(role_id(), [role_id()]) -> answer().
 delete_roles(RoleId, Roles) ->
-    Role = ?u:get_role(RoleId),
+    {ok, Role} = ?u:get_role(RoleId),
     RolesList = ordsets:from_list(Roles),
     NRole = Role#acl_role{member_of = lists:subtract(
                 Role#acl_role.member_of, RolesList)},
@@ -174,7 +185,7 @@ delete_roles(RoleId, Roles) ->
 %% @doc Rewrite roles for the given role
 -spec set_roles(role_id(), [role_id()]) -> answer().
 set_roles(RoleId, Roles) ->
-    Role = ?u:get_role(RoleId),
+    {ok, Role} = ?u:get_role(RoleId),
     ?u:set_role(Role#acl_role{member_of = ordsets:from_list(Roles)}),
     ok.
 

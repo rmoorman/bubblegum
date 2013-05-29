@@ -17,6 +17,11 @@
         ,input/2
         ,output/1
         ,output/2
+        ,from_json/1
+        ,to_json/1
+        ,find_from/2
+        ,find_till/2
+        ,merge/2
         ]).
 
 -include("problem.hrl").
@@ -39,15 +44,23 @@ body(R) -> R#problem.body.
 body(Body, R) -> R#problem{body = Body}.
 
 load(Id) -> 
-    R = model_kv_pg:read(Id, ?problem, problems),
-    R#problem{id = Id}.
+    model_kv_pg:read(Id, ?problem, problems).
 
-save(R) -> save(load(R#problem.id), R). 
+save(R) -> save(load(R#problem.id), R),
+    case load(R#problem.id) of
+        {ok, null} -> create(R);
+        {ok, Old}  -> save(Old, R);
+        {error, not_found} -> create(R)
+    end.
+
 save(Old, R) ->
     model_kv_pg:update(R#problem.id, R, ?problem, problems).
 
 create(R) ->
-    Id = model_kv_pg:alloc(problems),
+    Id = case R#problem.id of
+        undefined -> model_kv_pg:alloc(problems);
+        Q -> Q
+    end,
     model_kv_pg:update(Id, R#problem{id = Id}, ?problem, problems),
     R#problem{id = Id}.
 
@@ -81,5 +94,24 @@ output(R) ->
 output(Output, R) ->
     R#problem{output = Output}.
 
+find_from(Key, Limit) ->
+    model_kv_pg:find_from(Key, ?problem, problems, Limit).
 
+find_till(Key, Limit) ->
+    model_kv_pg:find_till(Key, ?problem, problems, Limit).
+
+to_json(Rs) when is_list(Rs) ->
+    jsonee:encode(Rs, [?problem]);
+to_json(R) when is_tuple(R)->
+    jsonee:encode(R, ?problem).
+
+from_json(Json) ->
+    jsonee:decode(Json, ?problem).
+
+merge(New, Old) ->
+    List = record_info(fields, problem),
+    jsonee:merge(fun merge/3, List, New, Old).
+
+merge(_, undefined, Old) -> Old;
+merge(_, New, _)         -> New.
 

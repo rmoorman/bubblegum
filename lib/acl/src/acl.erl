@@ -126,9 +126,9 @@ set_precedents(ResourceId, Precedents) ->
                || Action <- Names],
     Resource = case ?u:get_resource(ResourceId) of
         {ok, Rr} -> Rr;
-        _ -> ?u:alloc_resource(ResourceId)
+        _ -> {ok, Pr} = ?u:get_resource(?u:alloc_resource(ResourceId)),
+            Pr
     end,
-    io:format("action = ~p~n", [Actions]),
     ?u:set_resource(Resource#acl_resource{actions = Actions}),
     Precedents.
 

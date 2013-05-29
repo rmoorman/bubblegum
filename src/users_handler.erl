@@ -52,8 +52,11 @@ create_user(R, {id, Id}) ->
     Profile = profile:from_json(Body),
     Profile2 = Profile:hash_password(),
     Profile3 = Profile2:id(Id),
-    Profile4 = Profile3:save(),
-    {true, R2, {profile, Profile4}};
+    ProfileE = Profile3:save(),
+
+    {ok, UserRole} = rolename:get_role(user),
+    acl:add_roles(ProfileE:role(), [UserRole]),
+    {true, R2, {profile, ProfileE}};
 
 create_user(R, {profile, OldProfile}) ->
     {ok, Body, R2} = cowboy_req:body(R),

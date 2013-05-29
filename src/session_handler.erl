@@ -18,10 +18,35 @@
         ,from_json/2
         ]).
 
+% Session API
+-export([session/2
+        ]).
+
 -include_lib("model_tools/include/model.hrl").
 
 -define(cookie, <<"session_handle">>).
 
+%% Session API for other handlers
+%%
+%% Maybe I should create another library
+%% which would be works with cookies...
+session(R, S) ->
+    {St, R1} = cowboy_req:cookie(?cookie, R),
+    Now = erlang:now(),
+    case St of
+        undefined ->
+            {ok, Role} = rolename:get_role(anonymous),
+            {ok, Session} = session:create(<<>>, Role, % TODO user id
+                                           [{created, Now}, {last, Now}]),
+            R2 = cowboy_req:set_resp_cookie(?cookie, Session:token()
+                                           ,[{http_only, true}], R1);
+        Handle ->
+            R2 = R1,
+            {ok, Session} = session:load(Handle)
+    end,
+    {Session, R2, S}.
+
+%% Cowboy API
 init(_, _, []) ->
     {upgrade, protocol, cowboy_rest}.
 
@@ -74,7 +99,8 @@ from_json(R, undefined) ->
     {ok, Profile} = profile:load(Uuid),
     true = Profile:check_password(Pass),
     Now = erlang:now(),
-    {ok, Session} = session:create(Uuid, [], [{created, Now}, {last, Now}]),
+    Role = Profile:role(),
+    {ok, Session} = session:create(Uuid, Role, [{created, Now}, {last, Now}]),
     R3 = cowboy_req:set_resp_header(<<"location">>, <<"/user/", Uuid/binary>>, R2),
     R4 = cowboy_req:set_resp_cookie(?cookie, Session:token()
                                    ,[{http_only, true}], R3),

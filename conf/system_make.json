@@ -1,0 +1,10 @@
+{
+    "C++": {
+        "gcc": ["g++ #ARG# -o solution.exe solution.cpp", "./solution.exe"],
+        "clang": ["clang++ #ARG# -o solution.exe solution.cpp", "./solution.exe"]
+    },
+    "Haskell": {
+        "ghc": ["ghc #ARG# --make -O1 -o solution.exe solution.hs", "./solution.exe"]
+    }
+}
+

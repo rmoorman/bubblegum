@@ -7,17 +7,18 @@
 roles() ->
     {ok, Anon} = rolename:get_role(anonymous),
     {ok, User} = rolename:get_role(user),
-    {ok, Pow}  = rolename:get_role(power),
+    {ok, Pow}  = rolename:get_role(power_user),
     {ok, Admin}= rolename:get_role(admin),
-    {ok, SecAdmin} = rolename:get_role(secadm),
+    {ok, SecAdmin} = rolename:get_role(secadmin),
     ?roles.
 
 
 %% list/2
--spec list(Type :: atom(), Creator :: role_id()) -> [{role_id(), atom(), atom()}].
+-spec list(Type :: atom(), Creator :: acl:role_id()) -> 
+    [{acl:role_id(), atom(), atom()}].
 
 list(user, C) ->
-    ?roles = role(),
+    ?roles = roles(),
     [{Anon, read, allow}
     ,{C, update, allow}
     ,{Admin, update, allow}

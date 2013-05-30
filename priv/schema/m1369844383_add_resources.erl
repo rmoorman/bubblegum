@@ -7,9 +7,10 @@
 
 upgrade(_C) ->
     {ok, System} = acl:alloc_resource(),
+    resourcename:add(System, system),
     acl:set_precedents(System, precedents:list(system, no_one)),
     ok.
 
-downgade(_C) ->
+downgrade(_C) ->
     ok.
 

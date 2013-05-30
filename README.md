@@ -1,4 +1,4 @@
-Bubblegum Engine [![Build Status](https://travis-ci.org/FailFabric/funtester.png?branch=master)](https://travis-ci.org/FailFabric/funtester)
+Bubblegum Engine [![Build Status](https://travis-ci.org/FailFabric/bubblegum.png?branch=master)](https://travis-ci.org/FailFabric/bubblegum)
 ===
 
 An open-source contest engine which supports not only ACM ICPC style.

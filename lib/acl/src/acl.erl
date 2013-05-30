@@ -80,7 +80,7 @@ ask(Role, Action, Resource) when is_atom(Action) ->
 ask(RoleId, Actions, ResourceId) ->
     {ok, Res} = ?u:get_resource(ResourceId),
     Resource = Res#acl_resource.actions,
-    [default_policy(ask_(RoleId, Action, Resource, []))
+    [default_policy(ask_(RoleId, jsonee:transform_eep18(Action, string), Resource, []))
      || Action <- Actions].
 
 ask_(RoleId, Action, Resource, Visited) ->

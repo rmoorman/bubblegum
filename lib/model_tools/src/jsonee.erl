@@ -35,6 +35,7 @@
 
 -export([to_eep18/2
         ,from_eep18/2
+        ,transform_eep18/2
         ,encode/2
         ,decode/2
         ,merge/4
@@ -137,6 +138,10 @@ from_eep18({V}, {Fields, FormatsDict}) ->
     list_to_tuple(List);
 from_eep18(undefined, _) -> undefined.
 
+
+%% transform_eep18
+transform_eep18(What, Format) ->
+    from_eep18(to_eep18(What, Format), Format).
 
 %% Merge
 %% Merge by fact has nothing to json,

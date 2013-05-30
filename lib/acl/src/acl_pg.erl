@@ -58,7 +58,7 @@ set_resource(#acl_resource{id = Id} = Resource) ->
 alloc_resource() ->
     Uuid = model_kv_pg:alloc(acl_resource),
     set_resource(#acl_resource{id = Uuid, actions = []}),
-    Uuid.
+    {ok, Uuid}.
 
 alloc_resource(UUID) ->
     case model_kv_pg:exists(UUID, acl_resource) of
@@ -68,12 +68,12 @@ alloc_resource(UUID) ->
                                #acl_resource{id = UUID, actions = []},
                                ?acl_resource,
                                acl_resource),
-            UUID
+            {ok, UUID}
     end.
 
 
 create_resource(Resource) ->
-    Id = alloc_resource(),
+    {ok, Id} = alloc_resource(),
     NResource = Resource#acl_resource{id = Id},
     set_resource(NResource),
     NResource.

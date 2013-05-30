@@ -1,0 +1,12 @@
+{application, problem_queue,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { problem_queue_app, []}},
+  {env, []}
+ ]}.

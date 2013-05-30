@@ -12,7 +12,7 @@
 start(_StartType, _StartArgs) ->
     ToStart = [sasl, crypto,
                confetti, pg_pool, model_tools,
-               acl, profiles, problems, session,
+               acl, profiles, problems, session, problem_queue,
                ranch, cowboy],
     ToLoad  = [],
 

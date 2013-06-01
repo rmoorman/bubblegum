@@ -24,9 +24,9 @@
 -include("worker.hrl").
 -include_lib("problem_queue/include/problem_queue.hrl").
 
--record(state, {tag_list, id, dir}).
+-record(state, {tag_list, id, dir, sleep}).
 
--define(sleep_interval, 100 * 1000).
+-define(sleep_interval, 100).
 
 %%%===================================================================
 %%% API
@@ -62,7 +62,7 @@ init([]) ->
     Data = jsonee:decode(Cont, ?system_make),
     List = lists:usort([Cmp || {_Lang, Cmps} <- Data, {Cmp, _} <- Cmps]),
     io:format("ok, I'm worker. I found: ~p~n", [List]),
-    timer:send_after(1000 * 1000, tick),
+    timer:send_after(1000, tick),
     {A, B, C} = now(),
     random:seed(A, B, C),
     T = 36#ZZZzZZZzZZZzZZZz,
@@ -76,7 +76,7 @@ init([]) ->
     filelib:ensure_dir(Dir),
     NDir = Dir ++ "/" ++ Id,
     ok = file:make_dir(NDir),
-    {ok, #state{tag_list = List, id = Id, dir = NDir}}.
+    {ok, #state{tag_list = List, id = Id, dir = NDir, sleep = ?sleep_interval}}.
 
 %%--------------------------------------------------------------------
 %% @private
@@ -121,7 +121,7 @@ handle_cast(_Msg, State) ->
 %%--------------------------------------------------------------------
 handle_info(tick, State) ->
     {noreply, tick(State)};
-handle_info(_Info, State) ->
+handle_info(Info, State) ->
     {noreply, State}.
 
 %%--------------------------------------------------------------------
@@ -153,18 +153,23 @@ code_change(_OldVsn, State, _Extra) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-%%%
 
-tick(#state{tag_list = Tags} = State) ->
+tick(#state{tag_list = Tags, sleep = Sleep} = State) ->
     case problem_queue:fetch(Tags) of
         empty ->
-            timer:send_after(?sleep_interval * (80 + random:uniform(40)) div 100,
+            %io:format("Empty query now = ~p; sleep = ~p~n", [now(), Sleep]),
+            timer:send_after(round(Sleep * (90 + random:uniform(20)) / 100),
                              tick),
-            State;
+            State#state{sleep = adjtime(Sleep * 1.1)};
         {ok, Solution} ->
+            io:format("Solution = ~p~n", [Solution]),
             State1 = performe(Solution, State),
-            tick(State1)
+            tick(State1#state{sleep = adjtime(Sleep / 2)})
     end.
+
+adjtime(Time) when Time > 2000 -> 2000;
+adjtime(Time) when Time < 50 -> 50;
+adjtime(Time) -> Time.
 
 %%
 %% What should it do?

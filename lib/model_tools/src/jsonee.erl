@@ -36,7 +36,9 @@
 -export([to_eep18/2
         ,from_eep18/2
         ,transform_eep18/2
+        ,encode/1
         ,encode/2
+        ,decode/1
         ,decode/2
         ,merge/4
         ]).
@@ -56,6 +58,10 @@
 -spec encode(term(), format()) -> binary().
 encode(Var, Format) ->
     jiffy:encode(to_eep18(Var, Format)).
+
+-spec encode(term()) -> {ok, binary()}.
+encode(Var) ->
+    {ok, jiffy:encode(Var)}.
 
 % Simple structs
 -spec to_eep18(term(), format()) -> term().
@@ -100,6 +106,14 @@ to_eep18(Var, {Fields, FormatsDict}) ->
 -spec decode(binary(), format()) -> term().
 decode(Bin, Format) ->
     from_eep18(jiffy:decode(Bin), Format).
+
+-spec decode(binary()) -> {ok, term()} | {error, bad_json}.
+decode(Bin) ->
+    try {ok, jiffy:decode(Bin)}
+    catch
+        _:_ ->
+            {error, bad_json}
+    end.
 
 -spec from_eep18(term(), format()) -> term().
 from_eep18(V, id)        -> V;

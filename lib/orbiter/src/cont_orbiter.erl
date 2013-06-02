@@ -54,6 +54,10 @@ start_link(Contest) ->
 %%--------------------------------------------------------------------
 init(Contest) ->
     {ok, JS} = js_driver:new(),
+    Dir = code:priv_dir(orbiter),
+    Ans = js_driver:define_js(JS, {file, filename:join(Dir, "code.js")}),
+    io:format("Load code.js from dir ~p~nJS driver said: ~p~n", [Dir, Ans]),
+    ok = Ans,
     {ok, #state{contest = Contest, js = JS}}.
 
 %%--------------------------------------------------------------------

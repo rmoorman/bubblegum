@@ -7,6 +7,7 @@
                  ,body = ""
                  ,problems = []
                  ,dict = []
+                 ,code = []
                  }).
 
 -define(contest, ?jsonee(contest, [{id, uuid}
@@ -14,4 +15,5 @@
                                   ,{body, string}
                                   ,{problems, {dict, string, uuid}}
                                   ,{dict, {dict, string, id}}
+                                  ,{code, string}
                                   ])).

@@ -15,6 +15,8 @@
         ,problems/2
         ,dict/1
         ,dict/2
+        ,code/1
+        ,code/2
         ,from_json/1
         ,to_json/1
         ,find_from/2
@@ -49,6 +51,9 @@ problems(Problems, R) -> R#contest{problems = Problems}.
 
 dict(R) -> R#contest.dict.
 dict(Dict, R) -> R#contest{dict = Dict}.
+
+code(R) -> R#contest.code.
+code(Code, R) -> R#contest{code = Code}.
 
 find_from(Key, Limit) ->
     model_kv_pg:find_from(Key, ?contest, contests, Limit).

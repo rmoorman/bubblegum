@@ -72,8 +72,8 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-    C2p = ets:new(orbiter_dispatch),
-    P2c = ets:new(orbiter_back),
+    C2p = ets:new(orbiter_dispatch, []),
+    P2c = ets:new(orbiter_back, []),
     {ok, #state{c2p = C2p, p2c = P2c}}.
 
 %%--------------------------------------------------------------------

@@ -11,7 +11,7 @@
 
 start(_StartType, _StartArgs) ->
     ToStart = [sasl, crypto,
-               confetti, pg_pool, model_tools,
+               confetti, pg_pool, model_tools, contests,
                acl, profiles, problems, session, problem_queue,
                ranch, cowboy],
     ToLoad  = [],

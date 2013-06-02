@@ -1,0 +1,13 @@
+{application, contests,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  model_tools
+                 ]},
+  {mod, { contests_app, []}},
+  {env, []}
+ ]}.

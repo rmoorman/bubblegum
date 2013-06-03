@@ -21,9 +21,9 @@
          terminate/2,
          code_change/3]).
 
--export([submit/3
+-export([submit/4
         ,table/1
-        ,notify/3
+        ,notify/4
         ]).
 
 -record(state, {c2p, p2c}).
@@ -33,17 +33,18 @@
 %%%===================================================================
 
 
-submit(Submission, Problem, Contest) ->
+submit(Submission, Problem, Contest, Tag) ->
     {ok, Pid} = gen_server:call(?MODULE, {dispatch, Contest}),
-    gen_server:call(Pid, {submit, Submission, Problem, Contest}).
+    gen_server:call(Pid, {submit, Submission, Problem, Contest, Tag}).
 
 table(Contest) ->
     {ok, Pid} = gen_server:call(?MODULE, {dispatch, Contest}),
-    gen_server:call(Pid, {call, Contest}).
+    gen_server:call(Pid, {table, Contest}).
 
-notify(Submission, Problem, Contest) ->
+% for worker
+notify(Submission, Problem, Contest, Verdict) ->
     {ok, Pid} = gen_server:call(?MODULE, {dispatch, Contest}),
-    gen_server:call(Pid, {notify, Submission, Problem, Contest}).
+    gen_server:call(Pid, {notify, Submission, Problem, Contest, Verdict}).
 
 
 %%--------------------------------------------------------------------
@@ -90,6 +91,8 @@ init([]) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
+handle_call(stop, _, State) ->
+    {stop, normal, ok, State};
 handle_call({dispatch, Contest}, _, State) ->
     {reply, dispatch(Contest, State), State}.
 
@@ -158,13 +161,14 @@ code_change(_OldVsn, State, _Extra) ->
 %%% Internal functions
 %%%===================================================================
 
-dispatch(Contest, #state{c2p = Ets} = S) ->
-    case ets:lookup(Ets, Contest) of
+dispatch(Contest, S) ->
+    case ets:lookup(S#state.c2p, Contest) of
         [{_, Pid}] ->
             {ok, Pid};
          _ ->
             {ok, NPid} = cont_orbiter:start_link(Contest),
-            ets:insert_new({Contest, NPid}),
+            ets:insert(S#state.c2p, {Contest, NPid}),
+            ets:insert(S#state.p2c, {NPid, Contest}),
             {ok, NPid}
     end.
 

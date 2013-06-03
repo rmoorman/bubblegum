@@ -41,6 +41,8 @@
         ,decode/1
         ,decode/2
         ,merge/4
+        ,to_mochi/2
+        ,from_mochi/2
         ]).
 
 -include("model.hrl").
@@ -156,6 +158,30 @@ from_eep18(undefined, _) -> undefined.
 %% transform_eep18
 transform_eep18(What, Format) ->
     from_eep18(to_eep18(What, Format), Format).
+
+
+%% Mochi json encoding format
+from_mochi(What, Format) ->
+    from_eep18(from_mochi(What), Format).
+
+from_mochi(List) when is_list(List) ->
+    [from_mochi(Item) || Item <- List];
+from_mochi({struct, List}) ->
+    {[{Key, from_mochi(Value)} || {Key, Value} <- List]};
+from_mochi(Item) ->
+    Item.
+
+to_mochi(What, Format) ->
+    to_mochi(to_eep18(What, Format)).
+
+to_mochi(List) when is_list(List) ->
+    [to_mochi(Item) || Item <- List];
+to_mochi({List}) ->
+    {struct, [{Key, to_mochi(Value)} || {Key, Value} <- List]};
+to_mochi(Item) ->
+    Item.
+
+
 
 %% Merge
 %% Merge by fact has nothing to json,

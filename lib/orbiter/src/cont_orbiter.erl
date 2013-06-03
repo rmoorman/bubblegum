@@ -60,7 +60,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link(Contest) ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, Contest, []).
+    gen_server:start_link(?MODULE, Contest, []).
 
 %%%===================================================================
 %%% gen_server callbacks

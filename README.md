@@ -8,7 +8,7 @@ There are some other contest engines exists [1], most notable:
 * DOMjudge
 * Contester
 
-Some of them are proprietary, some written is hard-core C and it's easy to
+Some of them are proprietary, some written in hard-core C and it's not easy to
 extend or modify them.
 
 Contributing

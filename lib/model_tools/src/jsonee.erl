@@ -36,9 +36,13 @@
 -export([to_eep18/2
         ,from_eep18/2
         ,transform_eep18/2
+        ,encode/1
         ,encode/2
+        ,decode/1
         ,decode/2
         ,merge/4
+        ,to_mochi/2
+        ,from_mochi/2
         ]).
 
 -include("model.hrl").
@@ -56,6 +60,10 @@
 -spec encode(term(), format()) -> binary().
 encode(Var, Format) ->
     jiffy:encode(to_eep18(Var, Format)).
+
+-spec encode(term()) -> {ok, binary()}.
+encode(Var) ->
+    {ok, jiffy:encode(Var)}.
 
 % Simple structs
 -spec to_eep18(term(), format()) -> term().
@@ -101,6 +109,14 @@ to_eep18(Var, {Fields, FormatsDict}) ->
 decode(Bin, Format) ->
     from_eep18(jiffy:decode(Bin), Format).
 
+-spec decode(binary()) -> {ok, term()} | {error, bad_json}.
+decode(Bin) ->
+    try {ok, jiffy:decode(Bin)}
+    catch
+        _:_ ->
+            {error, bad_json}
+    end.
+
 -spec from_eep18(term(), format()) -> term().
 from_eep18(V, id)        -> V;
 from_eep18(V, undefined) -> V;
@@ -142,6 +158,30 @@ from_eep18(undefined, _) -> undefined.
 %% transform_eep18
 transform_eep18(What, Format) ->
     from_eep18(to_eep18(What, Format), Format).
+
+
+%% Mochi json encoding format
+from_mochi(What, Format) ->
+    from_eep18(from_mochi(What), Format).
+
+from_mochi(List) when is_list(List) ->
+    [from_mochi(Item) || Item <- List];
+from_mochi({struct, List}) ->
+    {[{Key, from_mochi(Value)} || {Key, Value} <- List]};
+from_mochi(Item) ->
+    Item.
+
+to_mochi(What, Format) ->
+    to_mochi(to_eep18(What, Format)).
+
+to_mochi(List) when is_list(List) ->
+    [to_mochi(Item) || Item <- List];
+to_mochi({List}) ->
+    {struct, [{Key, to_mochi(Value)} || {Key, Value} <- List]};
+to_mochi(Item) ->
+    Item.
+
+
 
 %% Merge
 %% Merge by fact has nothing to json,

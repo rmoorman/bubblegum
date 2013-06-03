@@ -1,0 +1,12 @@
+{application, orbiter,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { orbiter_app, []}},
+  {env, []}
+ ]}.

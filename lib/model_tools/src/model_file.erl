@@ -1,5 +1,6 @@
 -module(model_file).
 -export([create/1
+        ,update/2
         ,read/2
         ,delete/1
         ]).
@@ -15,16 +16,22 @@ create(File) ->
     Filename = path(Key),
     io:format("Filename: ~p~n", [Filename]),
     file:copy(File, Filename),
-    binary_to_list(Key).
+    {ok, binary_to_list(Key)}.
 
 read(Key, File) ->
     Filename = path(Key),
     file:copy(Filename, File),
     ok.
 
+update(Key, File) ->
+    Filename = path(Key),
+    file:copy(File, Filename),
+    ok.
+
 delete(Key) ->
     model_kv_pg:delete(Key, file_storage),
     Filename = path(Key),
     file:delete(Filename).
+
 
 

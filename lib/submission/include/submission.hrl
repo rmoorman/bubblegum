@@ -2,6 +2,7 @@
 
 -record(submission,
         {id
+        ,user
         ,problem
         ,contest
         ,ts
@@ -12,6 +13,7 @@
 -define(submission,
         ?jsonee(submission, [{id, uuid}
                             ,{problem, uuid}
+                            ,{user, uuid}
                             ,{contest, uuid}
                             ,{ts, timestamp}
                             ,{file, uuid}

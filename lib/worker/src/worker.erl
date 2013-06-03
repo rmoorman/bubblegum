@@ -215,7 +215,8 @@ performe(Solution, State) ->
     P1 = P:verdict(Results),
     P1:save(),
            
-    % Notification here (TODO)
+    % Notification here
+    orbiter:notify(Id, Problem, Contest, Results),
     State.
 
 prepare(Problem, Dir) ->

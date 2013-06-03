@@ -1,7 +1,7 @@
 language: erlang
 otp_release:
     - R15B02
-    - R16
+    - R16B
 
 services:
     - riak
